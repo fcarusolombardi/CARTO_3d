@@ -1,0 +1,19 @@
+
+ N1        N2        N3        NSST(>1=RK,else AB)   NWRIT     NREAD
+ 129        129        145       1                     0        0
+ NTST      TSLAB     TREST     TPIN       TMAX       IRESET  
+ 1000    1.0d0     1d-1     3d-4        17.d0         0   
+ ALX3D     REXT1     REXT2     ISTR3      STR3       lmax
+ 6.d0      4.0d0     4.0d0     0          8.d0       1
+ RaS       PrS       RaT       PrT        Sal.BL
+ 1d+3      1.0d0     1.d0      1.d0       2.7d-3
+ IDTV(0=fix,1=var)   DTMAX(dt var.)   RESID     CFLMAX    DT(dt fix)   CFLLIM(dt fix)
+ 0                   2d-5             1d+6      0.2d0     2d-5         4.0d0
+ inslws    inslwn    B.C. of momentum
+ 1         1
+ UWTB      LWTB      UWSB      LWSB    B.C. of scalars
+ 1         1         1         1
+ TFRAME    Kprop     Kint
+ 5d-2      1.0       0.1
+ RotN.X    RotN.Y    RotN.Z
+ 0.d0      0.d0      0.d0

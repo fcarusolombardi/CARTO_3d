@@ -1,0 +1,40 @@
+ N1        N2       N3        
+ 3       3       3
+ IRESET     NREAD    NWRIT       FOLDERLOAD
+ 1          0                 600        './restart_t/'
+ PPRO     NREADSTART   NREADEND   ECGPPRO
+ 0       2265        3000           0
+ NSST(>1=RK,else AB)   NSSTEP     NSSTEPDIV
+ 1                      4           1
+ NTST       TMAX      QTREST  QTFRAME TPIN(ms)  TECG(ms)
+ 10000000000  100000000.1d0  1.d0    50.d0     1.0d0      1000.d0
+ ALX3D     REXT1     REXT2     ISTR3      STR3       lmax
+ 14.0d0     10.0d0     10.0d0     0          8.d0       1
+ Z-Trans   X-Trans   Y-Trans
+ 6.0       5.0       4.50
+ Rey       RaS       PrS       RaT       PrT        Sal.BL
+ 3125      1d+3      1.0d0     1.d0      1.d0       2.7d-3
+ IDTV(0=fix,1=var)   DTMAX(dt var.)   DT(dt fix)   CFLMAX    CFLLIM(dt fix)   RESID
+ 0                   1.0d-4             1.0d-4         0.2d0     4.0d0            1d+6
+ UNDR      ERR_MAX   N_MAX_ITER (FOR STRONG COUPLING ONLY)
+ 0.d0      1d-4      10
+ inslws    inslwn    B.C. of momentum
+ 1         1
+ UWTB      LWTB      UWSB      LWSB    B.C. of scalars
+ 1         1         1         1
+ INFIG  BCS(0:auto 1:user)  COU       TILEMAX !FV set back INFIG=1
+ 0      1                   0.0          500
+ IMLSFOR  IMLSSTR  IMLSREF
+ 1        1        0      
+ WCHECK  FCHECK  WCUB    WEXP    NEL (27 or 125)
+ 1       0       0       1       27
+ WCON      WSCL    
+ 0.70      1.60001
+ LSTAR    USTAR   densitySTAR    SMZ_S       HR     NPERIOD   DYSSY
+ 0.0228     1.0     1050.0          0.5      60     4         0.0
+ STEPEF3d  STEPEF2d   STEPEF1d   TOL   MAXIT   MAXREST (GMRES EF BIDO) 
+ 5        10          10          1E-1    10    20                      
+ ECG_D   ECG_NSON   ESCLUDISETTOPURK  ESCLUDICELLCONN ESCLUDIZONSETTO inmm!
+ 1.0     2         0                 0               0
+ NAT_PAC   BSN    LEADS   MINF
+ 1         0      0       0

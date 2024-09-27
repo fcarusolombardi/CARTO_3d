@@ -1,0 +1,10 @@
+xS1 yS1 zS1 !3.03719 -1.68331 -2.20476
+2.97676 -1.8164 -2.18469
+xS2 yS2 zS2 ! Istmus 0.185897 -0.144582 -0.198256
+0.292163 -0.140558 0.0292632
+Amplitude-S1 Amplitude-S2 120 60
+2.5 2.5
+Slope MFstim
+40 1.5
+duration signal S1 [ms] | duration signal S2 [ms] | 500 signal S2 [ms]
+5 5 delay_S2stim

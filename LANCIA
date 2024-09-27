@@ -1,0 +1,60 @@
+#!/bin/bash                                                                                                                                 
+mkdir data fact vtkfiles restart
+rm *.e
+make
+cp ibmheart_gpu.e $1.e
+export OMP_NUM_THREADS=1;
+
+#determine ngpu and choose devices
+stringa=$2
+ngpu=${#stringa}
+echo "Length of the string is : $ngpu "
+
+#--> 1GPU
+if [ $ngpu = "1" ]
+then
+echo "run on 1 GPU   --> $2"
+export CUDA_VISIBLE_DEVICES=$2;
+fi
+#--> 2GPUs (it seems not necessarily consecutive numbers)
+if [ $ngpu = "2" ]
+then
+firstGPU=${stringa:0:1}
+secondGPU=${stringa:1:1}
+echo "run on 2 GPU   --> $firstGPU $secondGPU"
+export CUDA_VISIBLE_DEVICES=$firstGPU,$secondGPU;
+fi
+#--> 3GPUs 
+if [ $ngpu = "3" ]
+then
+firstGPU=${stringa:0:1}
+secondGPU=${stringa:1:1}
+thirdGPU=${stringa:2:1}
+echo "run on 3 GPU   --> $firstGPU $secondGPU $thirdGPU"
+export CUDA_VISIBLE_DEVICES=$firstGPU,$secondGPU,$thirdGPU;
+fi
+#--> 4GPUs 
+if [ $ngpu = "4" ]
+then
+echo "run on 4 GPU   --> all"
+# export CUDA_VISIBLE_DEVICES=$firstGPU,$secondGPU,$thirdGPU;
+fi
+
+
+#submit job
+if [ "$3" = "D" ]
+then
+echo "DEBUG MODE"
+mpirun -np $ngpu -bind-to none --mca btl_base_warn_component_unused 0  ./$1.e
+else
+echo "RUNNING MODE"
+nohup mpirun -np $ngpu -bind-to none --mca btl_base_warn_component_unused 0  ./$1.e  > test.log  &
+fi
+
+
+
+
+
+
+
+

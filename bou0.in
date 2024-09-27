@@ -1,0 +1,36 @@
+ N1        N2       N3        
+ 311       251      415
+ IRESET     NREAD    NWRIT       FOLDERLOAD
+  0        0         19000       '../z23v2_2V16allEF1V17_1_3comp/restart/'
+ PPRO     NREADSTART   NREADEND
+  0      100        100
+ NSST(>1=RK,else AB)   NSSTEP     NSSTEPDIV
+ 1                      1           1
+ NTST       TMAX     TREST     TFRAME     TPIN         
+ 10000000   25d0    10.d0       1d-1       1d-3      
+ ALX3D     REXT1     REXT2     ISTR3      STR3       lmax
+ 7.3d0     5.5d0     5.0d0     0          8.d0       1
+ Z-Trans   X-Trans   Y-Trans
+ 0.5       2.8       2.7
+ Rey       RaS       PrS       RaT       PrT        Sal.BL
+ 3d+1      1d+3      1.0d0     1.d0      1.d0       2.7d-3
+ IDTV(0=fix,1=var)   DTMAX(dt var.)   DT(dt fix)   CFLMAX    CFLLIM(dt fix)   RESID
+ 0                   5d-5             5d-5         0.2d0     4.0d0            1d+6
+ UNDR      ERR_MAX   N_MAX_ITER (FOR STRONG COUPLING ONLY)
+ 0.d0      1d-4      10
+ inslws    inslwn    B.C. of momentum
+ 1         1
+ UWTB      LWTB      UWSB      LWSB    B.C. of scalars
+ 1         1         1         1
+ INFIG  BCS(0:auto 1:user)  COU       TILEMAX
+ 0      1                   0.0          500
+ IMLSFOR  IMLSSTR  IMLSREF
+ 1        1        0      
+ WCHECK  FCHECK  WCUB    WEXP    NEL (27 or 125)
+ 1       0       0       1       27
+ WCON      WSCL    
+ 0.70      1.60001
+ LSTAR    USTAR   densitySTAR    SMZ_S       HR
+ 0.024    0.6     1050.0          0.5       60
+ STEPEF3d  TOL   MAXIT   MAXREST (GMRES EF BIDO)
+ 10        1E-1    10    20
