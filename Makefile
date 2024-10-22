@@ -116,7 +116,7 @@ endif
 
 ifeq ($(server), 'lngs')
 # GPU mode          
-FC=mpif90 -r8 -pgf90libs
+FC=mpif90 -O0 -r8 -pgf90libs
 FC+=-Mnovect
 FC+=-Mcuda=cuda11.8,cc80,ptxinfo -DUSE_NVTX -DUSE_CUDA
 FC+=-Mcudalib=cufft,nccl

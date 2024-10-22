@@ -591,7 +591,7 @@
       real(DP), dimension(:,:), allocatable :: xyza0_3d
 
       real(DP), dimension(:,:), allocatable :: XEF_3d
-      real(DP), dimension(:), allocatable :: potEFcell_3d
+      real(DP), dimension(:), allocatable :: potEFcell_3d,XEF_3ddt
       real(DP), dimension(:), allocatable :: potEFnode_3d
       real(DP), dimension(:), allocatable :: potEFface_3d
       !--------------------------------------------------- 
@@ -599,7 +599,12 @@
       real(DP), dimension(:,:), allocatable :: t_apd_3d,t_apd_2d
       real(DP), dimension(:), allocatable :: old_1,old_1_2d
       integer, dimension(:), allocatable :: f_apd,f_apd_2d,scar_tag_2d
-
+      real(DP), dimension(:), allocatable :: LATface_3d,LATnode_3d
+      !--------------------------------------------------- 
+      !CV calc
+      real(DP), dimension(:), allocatable :: CVdiv
+      real(DP), dimension(:,:), allocatable :: CVcell,CVnode,CVface_3d,CVrot
+      real(DP), dimension(:,:,:), allocatable :: CVgrad_cell,CVgrad_node
       !Laplace interp
       !---------------------------------------------------
       integer,dimension(:),allocatable :: myotag
@@ -853,7 +858,7 @@
       attributes(managed) :: xyzv_3d,xyzv0_3d,xyza_3d
       attributes(managed) :: xyza0_3d
       attributes(managed) :: XEF_3d
-      attributes(managed) :: potEFcell_3d
+      attributes(managed) :: potEFcell_3d,XEF_3ddt
       attributes(managed) :: potEFnode_3d
       attributes(managed) :: potEFface_3d
       attributes(managed) :: gradcell_3d
@@ -861,6 +866,10 @@
       !APD
       attributes(managed) :: t_apd_3d,old_1,f_apd
       attributes(managed) :: t_apd_2d,old_1_2d,f_apd_2d
+      attributes(managed) :: LATface_3d,LATnode_3d
+      !CV valc
+      attributes(managed) :: CVcell,CVnode,CVgrad_cell,CVgrad_node,CVface_3d
+      attributes(managed) :: CVdiv,CVrot
       !Laplace interp
       attributes(managed) :: myotag,meshquality_3d
       !CARTO variables

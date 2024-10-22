@@ -82,7 +82,7 @@
       allocate(boundary1_3d(2,nvtot_3d))
 
 
-      allocate(potEFcell_3d(nctot_3d))
+      allocate(potEFcell_3d(nctot_3d),XEF_3ddt(nvtot_3d))
       allocate(potEFnode_3d(nvtot_3d))
       allocate(potEFface_3d(nftot_3d))
       allocate(gradcell_3d(3,nctot_3d))
@@ -104,6 +104,13 @@
       allocate(t_apd_3d(4,nctot_3d))
       allocate(old_1(nctot_3d))
       allocate(f_apd(nctot_3d))
+      allocate(LATface_3d(nftot_3d),LATnode_3d(nvtot_3d))
+      !-----------------------------
+      !CV calc
+      allocate(CVcell(3,nctot_3d),CVnode(3,nvtot_3d))
+      allocate(CVgrad_cell(3,3,nctot_3d),CVgrad_node(3,3,nvtot_3d))
+      allocate(CVface_3d(3,nftot_3d))
+      allocate(CVdiv(nvtot_3d),CVrot(3,nvtot_3d))
       !-----------------------------                                                         
       !Laplace_tagging
       allocate(myotag(nctot_3d),meshquality_3d(nctot_3d))

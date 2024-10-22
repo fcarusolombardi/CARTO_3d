@@ -438,12 +438,74 @@ end do
 #ifdef ELECTRO
            write(121,*)'' 
           write(121,*)'POINT_DATA ',nvi_3d(inp)
+           write(121,*)'Scalars LAT_node FLOAT'
+           write(121,*)'LOOKUP_TABLE default'
+           do i=vstart_3d(inp),vend_3d(inp)
+              write(121,*) LATnode_3d(i)
+           end do
+
+           write(121,*)'' 
+          !write(121,*)'POINT_DATA ',nvi_3d(inp)
            write(121,*)'Scalars vtrans FLOAT'
            write(121,*)'LOOKUP_TABLE default'
            do i=vstart_3d(inp),vend_3d(inp)
               write(121,*) potEFnode_3d(i)
            end do
 
+           write(121,*)'' 
+           write(121,*)'Scalars CVx FLOAT'
+           write(121,*)'LOOKUP_TABLE default'
+           do i=vstart_3d(inp),vend_3d(inp)
+              write(121,*) CVnode(1,i)
+           end do
+           write(121,*)'' 
+           write(121,*)'Scalars CVy FLOAT'
+           write(121,*)'LOOKUP_TABLE default'
+           do i=vstart_3d(inp),vend_3d(inp)
+              write(121,*) CVnode(2,i)
+           end do
+           write(121,*)'' 
+           write(121,*)'Scalars CVz FLOAT'
+           write(121,*)'LOOKUP_TABLE default'
+           do i=vstart_3d(inp),vend_3d(inp)
+              write(121,*) CVnode(3,i)
+           end do
+           
+           write(121,*)'' 
+           write(121,*)'Scalars CV_div FLOAT'
+           write(121,*)'LOOKUP_TABLE default'
+           do i=vstart_3d(inp),vend_3d(inp)
+              write(121,*) CVdiv(i)
+           end do
+
+           write(121,*)'' 
+           write(121,*)'Scalars CV_rotx FLOAT'
+           write(121,*)'LOOKUP_TABLE default'
+           do i=vstart_3d(inp),vend_3d(inp)
+              write(121,*) CVrot(1,i)
+           end do
+
+           write(121,*)'' 
+           write(121,*)'Scalars CV_roty FLOAT'
+           write(121,*)'LOOKUP_TABLE default'
+           do i=vstart_3d(inp),vend_3d(inp)
+              write(121,*) CVrot(2,i)
+           end do
+
+           write(121,*)'' 
+           write(121,*)'Scalars CV_rotz FLOAT'
+           write(121,*)'LOOKUP_TABLE default'
+           do i=vstart_3d(inp),vend_3d(inp)
+              write(121,*) CVrot(3,i)
+           end do
+           
+           write(121,*)''
+           write(121,*)'Scalars vtrans_dt FLOAT'
+           write(121,*)'LOOKUP_TABLE default'
+           do i=vstart_3d(inp),vend_3d(inp)
+              write(121,*) XEF_3ddt(i)
+           end do
+           
            write(121,*)'' 
           ! write(121,*)'POINT_DATA ',nvi_3d(inp)
            write(121,*)'Scalars vert2chamb FLOAT'
@@ -476,7 +538,24 @@ end do
            do i=cstart_3d(inp),cend_3d(inp)
               write(121,*) CARTO_Dcell3d(i)
            end do
-
+           write(121,*)'' 
+           write(121,*)'Scalars CVcellx FLOAT'
+           write(121,*)'LOOKUP_TABLE default'
+           do i=cstart_3d(inp),cend_3d(inp)
+              write(121,*) CVcell(1,i)
+           end do
+           write(121,*)'' 
+           write(121,*)'Scalars CVcelly FLOAT'
+           write(121,*)'LOOKUP_TABLE default'
+           do i=cstart_3d(inp),cend_3d(inp)
+              write(121,*) CVcell(2,i)
+           end do
+           write(121,*)'' 
+           write(121,*)'Scalars CVcellz FLOAT'
+           write(121,*)'LOOKUP_TABLE default'
+           do i=cstart_3d(inp),cend_3d(inp)
+              write(121,*) CVcell(3,i)
+           end do
            ! write(121,*)'' 
            ! !write(121,*)'Scalars myotag FLOAT'
            ! write(121,*)'Scalars grad_y FLOAT'

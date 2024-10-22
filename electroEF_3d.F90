@@ -3,8 +3,7 @@
       use constants
       use mls_param
       USE ieee_arithmetic
-!@cuf   use cudafor
-
+!@cuf   use cudafor, cuf_minloc => minloc, cuf_maxloc => maxloc 
       implicit none
 
       !-------------------------------------------
@@ -94,6 +93,20 @@
       integer:: vsi,vei,fsi,fei,esi,eei,csi,cei
       character*150 :: stri
 
+      ! Conduction velocity
+      !------------------------------------------------------------------------------
+      integer:: indmin,indmax,v_max,v_min
+      real(DP)::LATx,LATy,LATz,cvmod,num1,num2,num3,latf,cvloc,cvlocx,cvlocy,cvlocz
+      real(DP)::cvlocmax,cvlocmin
+      real(DP)::xgradlat,ygradlat,zgradlat
+      real(DP)::cvf1,cvf2,cvf3
+      real(DP)::grad11,grad12,grad13
+      real(DP)::grad21,grad22,grad23
+      real(DP)::grad31,grad32,grad33
+      real(DP)::xV_max,yV_max,zV_max
+      real(DP)::xV_min,yV_min,zV_min
+      real(DP)::dxlat,dylat,dzlat,modgradlat
+      real(DP),dimension(4)::lat_cell_vert
       ! minimal model variables
       !------------------------------------------------------------------------------
       integer::CONST1,CONST2,CONST3,epi_endo_mur
@@ -101,7 +114,8 @@
       real(DP):: const10,const11,const12,const13,const14,const15,const16,const17,const18,const19
       real(DP):: const20,const21,const22,const23,const24,const25,const26,const27,const28,const29
       real(DP):: const30,const31,const32,app1,app2,app3,app4,app5
-      real(DP):: remod,maxcarto
+      real(DP):: remod
+
       !------------------------------------------------------------------------------
 #ifdef MITCHELL_SCHAEFFER
       ! Mitchell-Schaeffer
@@ -113,6 +127,9 @@
 !#ifdef USE_CUDA
 !        attributes(managed) :: gradcell_3d
 !#endif 
+#ifdef USE_CUDA
+      attributes(managed) :: lat_cell_vert
+#endif 
 
 !NOTAFV per considerare l'effetto delle piccole variazione geometriche durante la
 !depolarizzazione dovremmo aggiornare (ag ogni time step o multiplo) anche le informazioni
@@ -123,11 +140,6 @@
 !#ifdef S1S2-3D
       open(unit=15,file='S1S2_3dStim.in',status='old')
       read(15,*) dummy
-      !S1p1
-      read(15,*) dummy
-      !S1p2
-      read(15,*) dummy
-      !S1p3
       read(15,*) dummy
       read(15,*) dummy
       read(15,*) dummy
@@ -140,7 +152,6 @@
       close(15)
 !#endif
       treshold_apd = -79.0D0
-      maxcarto = maxval(CARTO_Dcell3d(:))
 !      delayS2=60.0D0/delayS2*1000.0D0
 #ifdef TP06      
 !Parameters, should i move it to param?
@@ -277,19 +288,11 @@
     CONST49c =  0.0552000*CONST43c;
 #endif
 #ifdef MITCHELL_SCHAEFFER
-    ! invtau_open  = 1.0D0/100.0D0
-    ! invtau_close = 1.0D0/140.0D0
-    ! invtau_in    = 1.0D0/0.13D0
-    ! invtau_out   = 1.0D0/2.60D0
-    ! u_gate    = 0.10D0
-
-    
-    invtau_open  = 1.0D0/120.0D0
-    invtau_close = 1.0D0/170.0D0
-    invtau_in    = 1.0D0/0.3D0
-!    invtau_out   = 1.0D0/6.0D0
-    invtau_out   = 1.0D0/5.80D0
-    u_gate    = 0.13D0
+    invtau_open  = 1.0D0/100.0D0
+    invtau_close = 1.0D0/140.0D0
+    invtau_in    = 1.0D0/0.13D0
+    invtau_out   = 1.0D0/2.60D0
+    u_gate    = 0.10
 #endif
 
     timeMS=timex*TSTAR*1000.d0
@@ -645,7 +648,7 @@
          ! endif
          !!Istim = 0.0D0 !ricambia
          !Istim=IstimEF_3d(i)
-         !if (nBeat.eq.0)then
+         if (nBeat.eq.0)then
            !  if ((timeMS.GT.0.0D0).AND.(timeMS.LT.duration_signal_S1)) then
          !       !Istim = IstimEF_3d(i)+IstimEF_3dS1(i)
          !       Istim = IstimEF_3dS1(i)
@@ -658,28 +661,31 @@
          !       Istim = 0.0D0
          !    endif
          ! elseif (nBeat.eq.1)then
-            ! if ((timeMS.GT.50.0D0).AND.(timeMS.LT.50.0D0+duration_signal_S1)) then
-            !    !Istim = IstimEF_3d(i)+IstimEF_3dS1(i)
-            !    Istim = IstimEF_3dS1(i)
-            ! elseif ((timeMS.GT.delayS2).AND.(timeMS.LT.delayS2+duration_signal_S2)) then
-            !     !Istim = IstimEF_3d(i)+IstimEF_3dS2(i)
-            !     !Istim = IstimEF_3dS2(i)
-            !    Istim = IstimEF_3dS2(i)
-            ! else
-            !    !Istim = IstimEF_3d(i)
-            !    Istim = 0.0D0
-            ! endif
-         !else
+            !if ((timeMS.GT.0.0D0).AND.(timeMS.LT.0.0D0+duration_signal_S1)) then
+               !Istim = IstimEF_3datria(i)!+IstimEF_3dS1(i)
+               !Istim = IstimEF_3dS1(i)
+            if ((timeMS.GT.0.0D0).AND.(timeMS.LT.0.0D0+duration_signal_S1)) then
+               !Istim = IstimEF_3d(i)!+IstimEF_3dS1(i)
+               Istim = IstimEF_3dS1(i)
+            elseif ((timeMS.GT.delayS2+0.0D0).AND.(timeMS.LT.delayS2+duration_signal_S2+0.0D0)) then
+                !Istim = IstimEF_3d(i)+IstimEF_3dS2(i)
+                !Istim = IstimEF_3dS2(i)
+               Istim = IstimEF_3dS2(i)
+            else
+               !Istim = IstimEF_3d(i)
+               Istim = 0.0D0
+            endif
+         else
             !Istim = IstimEF_3d(i)
             !Istim = 0.0D0
-            if ((timeMS.GT.50.0D0).AND.(timeMS.LT.50.0D0+duration_signal_S1)) then
-               !Istim = IstimEF_3d(i)+IstimEF_3dS1(i)
+            if ((timeMS.GT.0.0D0).AND.(timeMS.LT.0.0D0+duration_signal_S1)) then
+               !Istim = IstimEF_3d(i)!+IstimEF_3dS1(i)
                Istim = IstimEF_3dS1(i)
             else
                !Istim = IstimEF_3d(i)
                Istim = 0.0D0
             endif
-         !endif
+         endif
          
 !spatial term
         bordo = 0.0D0
@@ -1015,154 +1021,187 @@
 ! #else      
 !         epi_endo_mur = myotag(i)
         ! #endif
-        epi_endo_mur = 2 
+        epi_endo_mur = 1 
         CONST4 = -83;
         CONST5 = 2.7;
-        if (epi_endo_mur.EQ.2) then !Mur
-         CONST6 = 0.3;
-         CONST7 = 0.13;
-         CONST8 = 1.45;
-         CONST9 = 2.7342;
-         CONST10 = 2.0994;
-         CONST11 = 0.9087;
+        ! if (epi_endo_mur.EQ.2) then !Mur
+      !    CONST6 = 0.3;
+      !    CONST7 = 0.13;
+      !    CONST8 = 1.45;
+      !    CONST9 = 2.7342;
+      !    CONST10 = 2.0994;
+      !    CONST11 = 0.9087;
            
-         CONST12 =4.00;
-         CONST13 =1.45;
-         CONST14 =0.1;
-         CONST15 =410.0;
-         CONST16 =0.005;
-         CONST17 =0.078;
-         CONST18 =1.61;
-         CONST19 =91.00;
-         CONST20 =0.80;
-         CONST21 =2.1;
-         CONST22 =0.6;
-         CONST23 =3.3849;
-         CONST24 =0.01;
-         CONST25 =0.5;
-         CONST26 =70.00;
-         CONST27 =8.00;
-         CONST28 =200.00;
-         CONST29 =0.016;
-         CONST30 =280.;
-         CONST31 =80.00;
-         CONST32 =7.00;
-        elseif (epi_endo_mur.EQ.1) then !endo
-           ! CONST12 = 2.0D0;
-           ! CONST13 = 10.0D0;
-           ! CONST14 = 0.024D0!0.2D0!0.02D0;
-           ! CONST15 = 470.0D0;
-           ! CONST16 = 0.006D0;
-           ! CONST17 = 0.1040D0;
-           ! CONST18 = 1.56D0;
-           ! CONST19 = 40.0D0;
-           ! CONST20 = 1.2D0;
-           ! CONST21 = 2.0D0;
-           ! CONST22 = 0.65D0;
-           ! CONST23 = 2.9013D0;
-           ! CONST24 = 0.0273D0;
-           ! CONST25 = 0.78D0;
-           ! CONST26 = 6.0D0;
-           ! CONST27 = 140.0D0;
-           ! CONST28 = 200.0D0;
-           ! CONST29 = 0.016D0;
-           ! CONST30 = 280.0D0;
-           ! CONST31 = 75.0D0;
-           ! CONST32 = 6.0D00;
+      !    CONST12 =4.00;
+      !    CONST13 =1.45;
+      !    CONST14 =0.1;
+      !    CONST15 =410.0;
+      !    CONST16 =0.005;
+      !    CONST17 =0.078;
+      !    CONST18 =1.61;
+      !    CONST19 =91.00;
+      !    CONST20 =0.80;
+      !    CONST21 =2.1;
+      !    CONST22 =0.6;
+      !    CONST23 =3.3849;
+      !    CONST24 =0.01;
+      !    CONST25 =0.5;
+      !    CONST26 =70.00;
+      !    CONST27 =8.00;
+      !    CONST28 =200.00;
+      !    CONST29 =0.016;
+      !    CONST30 =280.;
+      !    CONST31 =80.00;
+      !    CONST32 =7.00;
+      !   elseif (epi_endo_mur.EQ.1) then !endo
+      !      ! CONST12 = 2.0D0;
+      !      ! CONST13 = 10.0D0;
+      !      ! CONST14 = 0.024D0!0.2D0!0.02D0;
+      !      ! CONST15 = 470.0D0;
+      !      ! CONST16 = 0.006D0;
+      !      ! CONST17 = 0.1040D0;
+      !      ! CONST18 = 1.56D0;
+      !      ! CONST19 = 40.0D0;
+      !      ! CONST20 = 1.2D0;
+      !      ! CONST21 = 2.0D0;
+      !      ! CONST22 = 0.65D0;
+      !      ! CONST23 = 2.9013D0;
+      !      ! CONST24 = 0.0273D0;
+      !      ! CONST25 = 0.78D0;
+      !      ! CONST26 = 6.0D0;
+      !      ! CONST27 = 140.0D0;
+      !      ! CONST28 = 200.0D0;
+      !      ! CONST29 = 0.016D0;
+      !      ! CONST30 = 280.0D0;
+      !      ! CONST31 = 75.0D0;
+      !      ! CONST32 = 6.0D00;
 
            
-         ! From supplmenetary material, Set 4V-3 (Fenton Science Adv.)
-         CONST6 = 0.218655D0;
-         CONST7 = 0.15D0;
-         CONST8 = 7.188259D0;
-         CONST9 = 2.031406D0;
-         CONST10 = 2.545600D0;
-         CONST11 = 0.856429D0;
+      !    ! From supplmenetary material, Set 4V-3 (Fenton Science Adv.)
+      !    CONST6 = 0.218655D0;
+      !    CONST7 = 0.15D0;
+      !    CONST8 = 7.188259D0;
+      !    CONST9 = 2.031406D0;
+      !    CONST10 = 2.545600D0;
+      !    CONST11 = 0.856429D0;
          
-         CONST12 = 13.090045D0;
-         CONST13 = 573.569884D0;
-         CONST14 = 0.044570D0
-         CONST15 = 284.169705D0;
-         CONST16 = 0.007950D0;
-         CONST17 = 0.168277D0;
-         CONST18 = 1.451815D0;
-         CONST19 = 28.726329D0;
-         CONST20 = 0.281850D0;
-         CONST21 = 1.937860D0;
-         CONST22 = 0.682362D0;
-         CONST23 = 2.347223D0;
-         CONST24 = 0.049502D0;
-         CONST25 = 0.651285D0;
-         CONST26 = 19.751628D0;
-         CONST27 = 101.167275D0;
-         CONST28 = 57.162563D0;
-         CONST29 = 0.028506D0;
-         CONST30 = 213.296779D0;
-         CONST31 = 19.147136D0;
-         CONST32 = 9.999739D0;
+      !    CONST12 = 13.090045D0;
+      !    CONST13 = 573.569884D0;
+      !    CONST14 = 0.044570D0
+      !    CONST15 = 284.169705D0;
+      !    CONST16 = 0.007950D0;
+      !    CONST17 = 0.168277D0;
+      !    CONST18 = 1.451815D0;
+      !    CONST19 = 28.726329D0;
+      !    CONST20 = 0.281850D0;
+      !    CONST21 = 1.937860D0;
+      !    CONST22 = 0.682362D0;
+      !    CONST23 = 2.347223D0;
+      !    CONST24 = 0.049502D0;
+      !    CONST25 = 0.651285D0;
+      !    CONST26 = 19.751628D0;
+      !    CONST27 = 101.167275D0;
+      !    CONST28 = 57.162563D0;
+      !    CONST29 = 0.028506D0;
+      !    CONST30 = 213.296779D0;
+      !    CONST31 = 19.147136D0;
+      !    CONST32 = 9.999739D0;
          
-       ! ! From supplmenetary material, Set 4V-4 (Fenton Science Adv.)
-         ! CONST6 = 0.33020D0;
-           ! CONST7 = 0.15D0;
-           ! CONST8 = 14.737856D0;
-           ! CONST9 = 2.016938D0;
-           ! CONST10 = 1.791970D0;
-           ! CONST11 = 0.857440D0;
+      !  ! ! From supplmenetary material, Set 4V-4 (Fenton Science Adv.)
+      !    ! CONST6 = 0.33020D0;
+      !      ! CONST7 = 0.15D0;
+      !      ! CONST8 = 14.737856D0;
+      !      ! CONST9 = 2.016938D0;
+      !      ! CONST10 = 1.791970D0;
+      !      ! CONST11 = 0.857440D0;
            
-           ! CONST12 = 7.005449D0;
-           ! CONST13 = 107.183777D0;
-           ! CONST14 = 0.153932D0
-           ! CONST15 = 365.098651D0;
-           ! CONST16 = 0.004032D0;
-           ! CONST17 = 0.129816D0;
-           ! CONST18 = 1.45D0;
-           ! CONST19 = 46.850196D0;
-           ! CONST20 = 0.404662D0;
-           ! CONST21 = 1.80D0;
-           ! CONST22 = 0.70D0;
-           ! CONST23 = 2.119200D0;
-           ! CONST24 = 0.011585D0;
-           ! CONST25 = 0.40D0;
-           ! CONST26 = 87.085277D0;
-           ! CONST27 = 105.663454D0;
-           ! CONST28 = 106.727040D0;
-           ! CONST29 = 0.037092D0;
-           ! CONST30 = 105.848052D0;
-           ! CONST31 = 18.754498D0;
-           ! CONST32 = 8.195328D0;
+      !      ! CONST12 = 7.005449D0;
+      !      ! CONST13 = 107.183777D0;
+      !      ! CONST14 = 0.153932D0
+      !      ! CONST15 = 365.098651D0;
+      !      ! CONST16 = 0.004032D0;
+      !      ! CONST17 = 0.129816D0;
+      !      ! CONST18 = 1.45D0;
+      !      ! CONST19 = 46.850196D0;
+      !      ! CONST20 = 0.404662D0;
+      !      ! CONST21 = 1.80D0;
+      !      ! CONST22 = 0.70D0;
+      !      ! CONST23 = 2.119200D0;
+      !      ! CONST24 = 0.011585D0;
+      !      ! CONST25 = 0.40D0;
+      !      ! CONST26 = 87.085277D0;
+      !      ! CONST27 = 105.663454D0;
+      !      ! CONST28 = 106.727040D0;
+      !      ! CONST29 = 0.037092D0;
+      !      ! CONST30 = 105.848052D0;
+      !      ! CONST31 = 18.754498D0;
+      !      ! CONST32 = 8.195328D0;
         
-      else !epi
-           CONST6 = 0.3;
-           CONST7 = 0.13;
-           CONST8 = 1.45;
-           CONST9 = 2.7342;
-           CONST10 = 2.0994;
-           CONST11 = 0.9087;
+      ! else !epi
+      !      CONST6 = 0.3;
+      !      CONST7 = 0.13;
+      !      CONST8 = 1.45;
+      !      CONST9 = 2.7342;
+      !      CONST10 = 2.0994;
+      !      CONST11 = 0.9087;
            
-           CONST12 =16.00;
-           CONST13 =1150.00;
-           CONST14 =0.006;
-           CONST15 =400.00;
-           CONST16 =0.006;
-           CONST17 =0.11;
-           CONST18 =1.55;
-           CONST19 =30.02;
-           CONST20 =0.996;
-           CONST21 =2.046;
-           CONST22 =0.65;
-           CONST23 =1.8875;
-           CONST24 =0.07;
-           CONST25 =0.94;
-           CONST26 =60.0;
-           CONST27 =15.00;
-           CONST28 =65.00;
-           CONST29 =0.03;
-           CONST30 =200.00;
-           CONST31 =60.00;
-           CONST32 =6.00;
-      endif
+      !      CONST12 =16.00;
+      !      CONST13 =1150.00;
+      !      CONST14 =0.006;
+      !      CONST15 =400.00;
+      !      CONST16 =0.006;
+      !      CONST17 =0.11;
+      !      CONST18 =1.55;
+      !      CONST19 =30.02;
+      !      CONST20 =0.996;
+      !      CONST21 =2.046;
+      !      CONST22 =0.65;
+      !      CONST23 =1.8875;
+      !      CONST24 =0.07;
+      !      CONST25 =0.94;
+      !      CONST26 =60.0;
+      !      CONST27 =15.00;
+      !      CONST28 =65.00;
+      !      CONST29 =0.03;
+      !      CONST30 =200.00;
+      !      CONST31 =60.00;
+      !      CONST32 =6.00;
+      ! endif
       
-
+      CONST6 = 0.3d0;
+      CONST7 = 0.13d0;
+      CONST8 = 1.4506d0;
+      CONST9 = 2.7342d0;
+      CONST10 = 2.0994d0;
+      CONST11 = 0.9087d0;
+      
+      CONST12 =2.0d0;
+      CONST13 =40.0d0;
+      CONST14 =0.20d0;
+      CONST15 =470.0d0;
+      CONST16 =0.006d0;
+      CONST17 =0.10d0;
+      CONST18 =1.56d0;
+      CONST19 =40.0d0;
+      CONST20 =1.2d0;
+      CONST21 =2.0d0;
+      CONST22 =0.65d0;
+      CONST23 =2.9013d0;
+      CONST24 =0.0273d0;
+      CONST25 =0.78d0;
+      CONST26 =40.0d0;
+      CONST27 =115.0d0;
+      CONST28 =20.0d0;
+      CONST29 =0.00615d0;
+      CONST30 =8.0d0;
+      CONST31 =55.0d0;
+      
+      !Added for tau_w+
+      CONST32 =6.0d0;
+      CONST33 =0.0005d0;
+      CONST34 =175.0d0;
+      CONST35 =230.0d0;
+      
       STA1 = XEF_3d(1,i); !nondimensional here
       STA2 = XEF_3d(2,i);
       STA3 = XEF_3d(3,i);
@@ -1208,10 +1247,11 @@
          ALG6=1.00;
       endif
       ALG11 =  (1.00000 - ALG6)*(1.00000 - ( STA1*1.00000)/CONST24)+ ALG6*CONST25;
-      ALG13 = CONST26+( (CONST27 - CONST26)*(1.00000+ tanh( CONST28*(STA1 - CONST29))))/2.00000;
-      app1=CONST30*ALG11*(1.0-ALG6);
-      app2=(CONST30-CONST30*ALG6+ALG13*ALG6);
-      app3=ALG13*CONST30;
+      ALG13 = CONST26+( (CONST27 - CONST26)*(1.00000+ tanh( CONST28*(STA1 - CONST29))))/2.00000;!tau_w-
+      ALG17 = CONST33+( (CONST34 - CONST33)*(1.00000+ tanh( CONST30*(STA1 - CONST33))))/2.00000;!tau_w+
+      app1=ALG17*ALG11*(1.0-ALG6);
+      app2=(ALG17-ALG17*ALG6+ALG13*ALG6);
+      app3=ALG13*ALG17;
       app4=app1/app2;
       app5=app2/app3;
       STA3np1=app4 + (STA3 -app4) *exp(-app5*dtMS);
@@ -1221,16 +1261,15 @@
       ALG15 = ( STA1*(1.00000 - ALG5))/ALG12+ALG5/ALG14;
       ALG16 = (  - ALG5*STA3*STA4)/CONST23;
       
-      remod=1/maxcarto*CARTO_Dcell3d(i)!10.0D0/1.65D0*CARTO_Dcell3d(i)
            
-      RAT1 =  - (ALG9+ALG15+ALG16) -remod*Istim; 
+      RAT1 =  - (ALG9+ALG15+ALG16) -Istim; 
       
       CONST4 = -83;
       CONST5 = 2.7;
 
-     ! remod=1/maxcarto*CARTO_Dcell3d(i)!10.0D0/1.65D0*CARTO_Dcell3d(i)
+      remod=1.0D0!5.0D0*CARTO_Dcell3d(i)
       
-      XEF_3d(1,i) = STA1 + dtMS*(RAT1+rhspot/(CONST5-CONST4)); 
+      XEF_3d(1,i) = STA1 + dtMS*(remod*RAT1+rhspot/(CONST5-CONST4)); 
       XEF_3d(2,i) = STA2np1
       XEF_3d(3,i) = STA3np1
       XEF_3d(4,i) = STA4np1
@@ -1239,7 +1278,7 @@
 
 #endif
 #ifdef MITCHELL_SCHAEFFER
-      remod=1.0D0/0.18D0*CARTO_Dcell3d(i)!10.0D0/1.65D0*CARTO_Dcell3d(i)
+      remod=1.0D0/0.09D0*CARTO_Dcell3d(i)!10.0D0/1.65D0*CARTO_Dcell3d(i)
       STA1 = XEF_3d(1,i); !nondimensional here
       STA2 = XEF_3d(2,i);
       if (STA1.lt.u_gate)then
@@ -1600,8 +1639,429 @@
 
           endif
        enddo
-!@cuf istat = cudaDeviceSynchronize !JDR TMP
+       !@cuf istat = cudaDeviceSynchronize !JDR TMP
+     !find nodal values CV
+#ifdef USE_CUDA
+     !$cuf kernel do (1)
+#endif
+     do i=vstart_3d(1),vend_3d(1)
+        num      = 0.0d0
+        den      = 0.0d0
+#ifdef ELEGEO0
+        xV1 = xyz0_3d(1,i)
+        yV1 = xyz0_3d(2,i)
+        zV1 = xyz0_3d(3,i)
+#else
+        xV1 = xyz_3d(1,i)
+        yV1 = xyz_3d(2,i)
+        zV1 = xyz_3d(3,i)
+#endif
+        do j=1,n_cell_of_vert_3d(i)
+           c1=cell_of_vert_3d(j,i)
+           if (cell_to_chamb_3d(c1).lt.5) then!ne.9) then !MOD_BC
+              xC1 = cell_bar(1,c1)
+              yC1 = cell_bar(2,c1)
+              zC1 = cell_bar(3,c1)
+              dvvjj = sqrt( (xV1-xC1)**2+(yV1-yC1)**2+(zV1-zC1)**2)
+              num = num + t_apd_3d(1,c1)/dvvjj
+              den = den + 1.D0/dvvjj
+           endif !MOD_BC
+        enddo
+        if (den.NE.0.0D0) then
+           LATnode_3d(i)=num/den
+        else
+           LATnode_3d(i)=0.0d0
+        endif
+     enddo
+     !@cuf istat = cudaDeviceSynchronize !JDR TMP
 
+       
+       !Conduction velocity calculation
+       !find gradient on faces
+#ifdef USE_CUDA
+       !$cuf kernel do (1)
+#endif
+       do i=fstart_3d(1),fend_3d(1)
+          c1 = cell_of_face_3d(1,i)
+          c2 = cell_of_face_3d(2,i)
+          
+          g1interp = g1interpface_3d(i)
+          xvers  = versCFface_3d(1,i)
+          yvers  = versCFface_3d(2,i)
+          zvers  = versCFface_3d(3,i)
+          distCF = distCFface_3d(i)
+          if ((c1.NE.0).AND.(c2.NE.0)) then
+             chamb1 = cell_to_chamb_3d(c1)
+             chamb2 = cell_to_chamb_3d(c2)
+             if ((chamb1.lt.5).AND.(chamb2.lt.5)) then
+                !grandiente medio
+                latf = g1interp*t_apd_3d(1,c1) + (1-g1interp)*t_apd_3d(1,c2)
+             else
+                latf = 0.0D0 !for Neumann bcs
+             endif
+          elseif ((c1.NE.0).AND.(c2.EQ.0)) then
+             latf = t_apd_3d(1,c1)
+          elseif ((c1.EQ.0).AND.(c2.NE.0)) then
+             latf = t_apd_3d(1,c2)
+          endif
+          LATface_3d(i) = latf
+       enddo
+       !@cuf istat = cudaDeviceSynchronize !JDR TMP
+
+       !Find grad(LAT) on cells
+#ifdef USE_CUDA
+        !$cuf kernel do (1)
+#endif
+      do i=cstart_3d(1),cend_3d(1)
+        xgradlat=0.0D0
+        ygradlat=0.0D0
+        zgradlat=0.0D0
+        do j=1,4
+           f1=face_of_cell_3d(j,i)
+           xnormale=normalfaceofcells_3d(1,j,i)
+           ynormale=normalfaceofcells_3d(2,j,i)
+           znormale=normalfaceofcells_3d(3,j,i)
+
+#ifdef ELEGEO0
+          latf = LATface_3d(f1)*sur0_3d(f1)
+#else
+          latf = LATface_3d(f1)*sur_3d(f1)
+#endif
+          xgradlat = xgradlat + latf*xnormale
+          ygradlat = ygradlat + latf*ynormale
+          zgradlat = zgradlat + latf*znormale
+        enddo
+#ifdef ELEGEO0
+        volcell = vol0_3d(i)
+#else
+        volcell = vol_3d(i)
+#endif  
+        LATx  =  xgradlat/volcell/(1000.D0*LSTAR)
+        LATy  =  ygradlat/volcell/(1000.D0*LSTAR)
+        LATz  =  zgradlat/volcell/(1000.D0*LSTAR)
+        if ((LATx*LATx+LATy*LATy+LATz*LATz).gt.0.01d0) then
+
+           v1 = vert_of_cell_3d(1,i)
+           v2 =	vert_of_cell_3d(2,i)
+           v3 =	vert_of_cell_3d(3,i)
+           v4 =	vert_of_cell_3d(4,i)
+           lat_cell_vert(1) = LATnode_3d(v1)
+           lat_cell_vert(2) = LATnode_3d(v2)
+           lat_cell_vert(3) = LATnode_3d(v3)
+           lat_cell_vert(4) = LATnode_3d(v4)
+           indmax = maxloc(lat_cell_vert(:),1)
+           indmin = minloc(lat_cell_vert(:),1)
+           v_max = vert_of_cell_3d(indmax,i)
+           v_min = vert_of_cell_3d(indmin,i)
+
+#ifdef ELEGEO0
+        xV_max = xyz0_3d(1,v_max)
+        yV_max = xyz0_3d(2,v_max)
+        zV_max = xyz0_3d(3,v_max)
+        xV_min = xyz0_3d(1,v_min)
+        yV_min = xyz0_3d(2,v_min)
+        zV_min = xyz0_3d(3,v_min)
+#else   
+        xV_max = xyz_3d(1,v_max)
+        yV_max = xyz_3d(2,v_max)
+        zV_max = xyz_3d(3,v_max)  
+        xV_min = xyz_3d(1,v_min)
+        yV_min = xyz_3d(2,v_min)
+        zV_min = xyz_3d(3,v_min)
+#endif 
+        dxlat= (xV_max-xV_min)*LATx/modgradlat
+        dylat= (yV_max-yV_min)*LATy/modgradlat
+        dzlat= (zV_max-zV_min)*LATz/modgradlat
+        cvmod =  sqrt(dxlat*dxlat+dylat*dylat+dzlat*dzlat)/&
+                 (LATnode_3d(v_max)-LATnode_3d(v_min))/modgradlat
+        else
+           cvmod = 0.0d0
+        endif
+
+        CVcell(1,i)=LATx*cvmod
+        CVcell(2,i)=LATy*cvmod
+        CVcell(3,i)=LATz*cvmod
+
+        
+     enddo
+     !@cuf istat = cudaDeviceSynchronize !JDR TMP
+       !find CV on faces
+#ifdef USE_CUDA
+       !$cuf kernel do (1)
+#endif
+       do i=fstart_3d(1),fend_3d(1)
+          c1 = cell_of_face_3d(1,i)
+          c2 = cell_of_face_3d(2,i)
+          
+          g1interp = g1interpface_3d(i)
+          xvers  = versCFface_3d(1,i)
+          yvers  = versCFface_3d(2,i)
+          zvers  = versCFface_3d(3,i)
+          distCF = distCFface_3d(i)
+          if ((c1.NE.0).AND.(c2.NE.0)) then
+             chamb1 = cell_to_chamb_3d(c1)
+             chamb2 = cell_to_chamb_3d(c2)
+             if ((chamb1.lt.5).AND.(chamb2.lt.5)) then
+                !grandiente medio
+                cvf1 = g1interp*CVcell(1,c1) + (1-g1interp)*CVcell(1,c2)
+                cvf2 = g1interp*CVcell(2,c1) + (1-g1interp)*CVcell(2,c2)
+                cvf3 = g1interp*CVcell(3,c1) + (1-g1interp)*CVcell(3,c2)
+             else
+                cvf1 = 0.0d0
+                cvf2 = 0.0d0
+                cvf3 = 0.0d0
+             endif
+          elseif ((c1.NE.0).AND.(c2.EQ.0)) then
+             cvf1 = CVcell(1,c1)
+             cvf2 = CVcell(2,c1)
+             cvf3 = CVcell(3,c1)
+          elseif ((c1.EQ.0).AND.(c2.NE.0)) then
+             cvf1 = CVcell(1,c2)
+             cvf2 = CVcell(2,c2)
+             cvf3 = CVcell(3,c2)
+          endif
+          CVface_3d(1,i) = cvf1
+          CVface_3d(2,i) = cvf2
+          CVface_3d(3,i) = cvf3
+       enddo
+       !@cuf istat = cudaDeviceSynchronize !JDR TMP
+
+!Find grad(CV) on cells
+#ifdef USE_CUDA
+        !$cuf kernel do (1)
+#endif
+      do i=cstart_3d(1),cend_3d(1)
+        grad11=0.0D0
+        grad12=0.0D0
+        grad13=0.0D0
+        grad21=0.0D0
+        grad22=0.0D0
+        grad23=0.0D0
+        grad31=0.0D0
+        grad32=0.0D0
+        grad33=0.0D0
+        do j=1,4
+           f1=face_of_cell_3d(j,i)
+           xnormale=normalfaceofcells_3d(1,j,i)
+           ynormale=normalfaceofcells_3d(2,j,i)
+           znormale=normalfaceofcells_3d(3,j,i)
+
+#ifdef ELEGEO0
+          cvf1 = CVface_3d(1,f1)*sur0_3d(f1)
+          cvf2 = CVface_3d(2,f1)*sur0_3d(f1)
+          cvf3 = CVface_3d(3,f1)*sur0_3d(f1)
+#else
+          cvf1 = CVface_3d(1,f1)*sur_3d(f1)
+          cvf2 = CVface_3d(2,f1)*sur_3d(f1)
+          cvf3 = CVface_3d(3,f1)*sur_3d(f1)
+#endif
+          grad11 = grad11 + cvf1*xnormale
+          grad12 = grad12 + cvf2*xnormale
+          grad13 = grad13 + cvf3*xnormale
+          
+          grad21 = grad21 + cvf1*ynormale
+          grad22 = grad22 + cvf2*ynormale
+          grad23 = grad23 + cvf3*ynormale
+          
+          grad31 = grad31 + cvf1*znormale
+          grad32 = grad32 + cvf2*znormale
+          grad33 = grad33 + cvf3*znormale
+          
+        enddo
+#ifdef ELEGEO0
+        volcell = vol0_3d(i)
+#else
+        volcell = vol_3d(i)
+#endif
+
+        CVgrad_cell(1,1,i)=grad11
+        CVgrad_cell(1,2,i)=grad12
+        CVgrad_cell(1,3,i)=grad13
+
+        CVgrad_cell(2,1,i)=grad21
+        CVgrad_cell(2,2,i)=grad22
+        CVgrad_cell(2,3,i)=grad23
+        
+        CVgrad_cell(3,1,i)=grad31
+        CVgrad_cell(3,2,i)=grad32
+        CVgrad_cell(3,3,i)=grad33
+
+        
+     enddo
+     !@cuf istat = cudaDeviceSynchronize !JDR TMP
+
+     
+     !find nodal values CV
+#ifdef USE_CUDA
+     !$cuf kernel do (1)
+#endif
+     do i=vstart_3d(1),vend_3d(1)
+        num1     = 0.0d0
+        num2     = 0.0d0
+        num3     = 0.0d0
+        den      = 0.0d0
+        cvlocmax = 0.0d0
+        cvlocmin = 0.0D0
+#ifdef ELEGEO0
+        xV1 = xyz0_3d(1,i)
+        yV1 = xyz0_3d(2,i)
+        zV1 = xyz0_3d(3,i)
+#else
+        xV1 = xyz_3d(1,i)
+        yV1 = xyz_3d(2,i)
+        zV1 = xyz_3d(3,i)
+#endif
+        do j=1,n_cell_of_vert_3d(i)
+           c1=cell_of_vert_3d(j,i)
+           if (cell_to_chamb_3d(c1).lt.5) then!ne.9) then !MOD_BC
+              xC1 = cell_bar(1,c1)
+              yC1 = cell_bar(2,c1)
+              zC1 = cell_bar(3,c1)
+              dvvjj = sqrt( (xV1-xC1)**2+(yV1-yC1)**2+(zV1-zC1)**2)
+              num1 = num1 + CVcell(1,c1)/dvvjj
+              num2 = num2 + CVcell(2,c1)/dvvjj
+              num3 = num3 + CVcell(3,c1)/dvvjj
+              den = den + 1.D0/dvvjj
+           endif !MOD_BC
+        enddo
+        cvloc =1.0d0
+        if (den.NE.0.0D0) then
+           CVnode(1,i)=num1/den*cvloc
+           CVnode(2,i)=num2/den*cvloc
+           CVnode(3,i)=num3/den*cvloc
+        else
+           CVnode(1,i)=0.0D0
+           CVnode(2,i)=0.0D0
+           CVnode(3,i)=0.0D0
+        endif
+     enddo
+     !@cuf istat = cudaDeviceSynchronize !JDR TMP
+
+     !find nodal values grad(CV)
+#ifdef USE_CUDA
+     !$cuf kernel do (1)
+#endif
+     do i=vstart_3d(1),vend_3d(1)
+
+        grad11=0.0D0
+        grad12=0.0D0
+        grad13=0.0D0
+
+        grad21=0.0D0
+        grad22=0.0D0
+        grad23=0.0D0
+
+        grad31=0.0D0
+        grad32=0.0D0
+        grad33=0.0D0
+        
+        den   =0.0d0
+#ifdef ELEGEO0
+        xV1 = xyz0_3d(1,i)
+        yV1 = xyz0_3d(2,i)
+        zV1 = xyz0_3d(3,i)
+#else
+        xV1 = xyz_3d(1,i)
+        yV1 = xyz_3d(2,i)
+        zV1 = xyz_3d(3,i)
+#endif
+        do j=1,n_cell_of_vert_3d(i)
+           c1=cell_of_vert_3d(j,i)
+           if (cell_to_chamb_3d(c1).lt.5) then!ne.9) then !MOD_BC
+              xC1 = cell_bar(1,c1)
+              yC1 = cell_bar(2,c1)
+              zC1 = cell_bar(3,c1)
+              dvvjj = sqrt( (xV1-xC1)**2+(yV1-yC1)**2+(zV1-zC1)**2)
+
+              grad11 = grad11 + CVgrad_cell(1,1,c1)/dvvjj
+              grad12 = grad12 +	CVgrad_cell(1,2,c1)/dvvjj
+              grad13 = grad13 +	CVgrad_cell(1,3,c1)/dvvjj
+              
+              grad21 = grad21 + CVgrad_cell(2,1,c1)/dvvjj
+              grad22 = grad22 +	CVgrad_cell(2,2,c1)/dvvjj
+              grad23 = grad23 +	CVgrad_cell(2,3,c1)/dvvjj
+
+              grad31 = grad31 + CVgrad_cell(3,1,c1)/dvvjj
+              grad32 = grad32 +	CVgrad_cell(3,2,c1)/dvvjj
+              grad33 = grad33 +	CVgrad_cell(3,3,c1)/dvvjj
+
+              den = den + 1.D0/dvvjj
+           endif !MOD_BC
+        enddo
+
+        CVgrad_node(1,1,i)=grad11
+        CVgrad_node(1,2,i)=grad12
+        CVgrad_node(1,3,i)=grad13
+
+        CVgrad_node(2,1,i)=grad21
+        CVgrad_node(2,2,i)=grad22
+        CVgrad_node(2,3,i)=grad23
+        
+        CVgrad_node(3,1,i)=grad31
+        CVgrad_node(3,2,i)=grad32
+        CVgrad_node(3,3,i)=grad33
+
+        CVdiv(i)   = grad11 + grad22 + grad33
+
+        CVrot(1,i) = grad32 - grad23
+        CVrot(2,i) = grad13 - grad31
+        CVrot(3,i) = grad21 - grad12
+        
+     enddo
+     !@cuf istat = cudaDeviceSynchronize !JDR TMP
+
+
+!find nodal values of dV/dt
+#ifdef USE_CUDA
+        !$cuf kernel do (1)
+#endif
+!do i=vstart_3d(1),vend_3d(1)
+       do i=vstart_3d(1),vend_3d(1)
+        num=0
+#ifdef BIDOMAIN
+        numext=0
+#endif
+        den=0
+#ifdef ELEGEO0
+       xV1 = xyz0_3d(1,i)
+       yV1 = xyz0_3d(2,i)
+       zV1 = xyz0_3d(3,i)
+#else
+       xV1 = xyz_3d(1,i)
+       yV1 = xyz_3d(2,i)
+       zV1 = xyz_3d(3,i)
+#endif
+       
+       do j=1,n_cell_of_vert_3d(i)
+            c1=cell_of_vert_3d(j,i)
+            if (cell_to_chamb_3d(c1).lt.5) then!ne.9) then !MOD_BC
+               xC1 = cell_bar(1,c1)
+               yC1 = cell_bar(2,c1)
+               zC1 = cell_bar(3,c1)
+
+               dvvjj = sqrt( (xV1-xC1)**2+(yV1-yC1)**2+(zV1-zC1)**2)
+               num = num + potEFcell_3d(c1)/dvvjj
+               den = den + 1.D0/dvvjj
+#ifdef BIDOMAIN
+               numext = numext + potextEFcell_3d(c1)/dvvjj
+#endif
+            endif !MOD_BC
+        enddo
+        if (den.NE.0.0D0) then
+           XEF_3ddt(i)=(num/den-potEFnode_3d(i))/dtMS
+        else
+           XEF_3ddt(i)=-100000
+        endif
+#ifdef BIDOMAIN
+        if (den.NE.0.0D0) then
+           potextEFnode_3d(i)=numext/den
+        else
+           potextEFnode_3d(i)=-83.0D0
+        endif
+#endif
+    enddo
+!@cuf istat = cudaDeviceSynchronize !JDR TMP
+       
        
 #ifdef BIDOMAIN
 
@@ -2187,13 +2647,16 @@
 
             potEFcell_3d(i) = XEF_3d(1,i)
 #endif
-#ifdef MINIMAL_MODEL
+#ifdef MINIMAL_MODEL_AAA
             XEF_3d(1,i) = 0.0D0;
             XEF_3d(2,i) = 1.0D0;
             XEF_3d(3,i) = 1.0D0;
             XEF_3d(4,i) = 0.0D0;
 
             potEFcell_3d(i) = -83.0D0!XEF_3d(1,i)!+XEF_3d(1,i)*(2.7D0 - 83.0D0)!-83.0d0!XEF_3d(1,i)
+
+            minpotLV=-83.0D0
+            minpotRV=-83.0D0
 #endif
 #ifdef MITCHELL_SCHAEFFER
             XEF_3d(1,i) = 0.0D0;
@@ -2202,6 +2665,9 @@
             XEF_3d(4,i) = 0.0D0;
 
             potEFcell_3d(i) = -83.0D0!XEF_3d(1,i)!+XEF_3d(1,i)*(2.7D0 - 83.0D0)!-83.0d0!XEF_3d(1,i)
+
+            minpotLV=-83.0D0
+            minpotRV=-83.0D0
 #endif
 
 
@@ -2232,14 +2698,20 @@
             XEF_3d(21,i) = 1.488;
 
             potEFcell_3d(i) = XEF_3d(1,i)
+
+            minpotLA=-81.18D0
+            minpotRA=-81.18D0
 #endif
-#ifdef MINIMAL_MODEL_AAA
+#ifdef MINIMAL_MODEL
             XEF_3d(1,i) = 0.0D0;
             XEF_3d(2,i) = 1.0D0;
             XEF_3d(3,i) = 1.0D0;
             XEF_3d(4,i) = 0.0D0;
 
             potEFcell_3d(i) = -83.0D0!XEF_3d(1,i)!+XEF_3d(1,i)*(2.7D0 - 83.0D0)!-83.0d0!XEF_3d(1,i)
+
+            minpotLA=-83.0D0
+            minpotRA=-83.0D0
 #endif
          else
 
@@ -2289,91 +2761,19 @@
 !      XEF_3d(22,:)=0. !All cells are in the healthy tissue; no scar
 !#endif
       
-      minpotLV=Volt
-      minpotLA=-81.18
-      minpotRV=Volt
-      minpotRA=-81.18
+      ! minpotLV=Volt
+      ! minpotLA=-81.18
+      ! minpotRV=Volt
+      ! minpotRA=-81.18
 
       meshquality_3d(:) = 0.0D0
       astressEFcell_3d(:)=0.D0
       astressEFnode_3d(:)=0.D0
       astressEFedge_3d(:)=0.D0
-      !#ifdef S1S2-3D
-      IstimEF_3dS1(:) = 0.0D0
-      IstimEF_3dS2(:) = 0.0D0
-      
+!#ifdef S1S2-3D
       open(unit=15,file='S1S2_3dStim.in',status='old')
-      
       read(15,*) dummy
       read(15,*) xS1,yS1,zS1
-      !First point
-#ifdef USE_CUDA
-      !$cuf kernel do (1) 
-#endif
-      do i=cstart_3d(1),cend_3d(1)
-         
-         chamb = cell_to_chamb_3d(i)
-         if ((chamb.eq.1).or.(chamb.eq.3)) then
-         
-            xBc = cell_bar(1,i)
-            yBc = cell_bar(2,i)
-            zBc = cell_bar(3,i)
-            distveG2=sqrt((xBc-xS1)**2+(yBc-yS1)**2+(zBc-zS1)**2)
-            if ((distveG2.LT.(5.D0/(1000.D0*LSTAR))).and.(scar_cell(i).ne.2)) then
-!               IstimEF_3d(i)=-60.D0
-               !IstimEF_3dS1(i)=-0.30D0 !minimal stimolo
-               IstimEF_3dS1(i)=-1.0D0 !minimal stimolo 
-            endif
-         endif
-      enddo
-      !@cuf istat = cudaDeviceSynchronize !JDR TMP
-
-      !Second point
-      read(15,*) xS1,yS1,zS1      
-#ifdef USE_CUDA
-      !$cuf kernel do (1) 
-#endif
-      do i=cstart_3d(1),cend_3d(1)
-         
-         chamb = cell_to_chamb_3d(i)
-         if ((chamb.eq.1).or.(chamb.eq.3)) then
-         
-            xBc = cell_bar(1,i)
-            yBc = cell_bar(2,i)
-            zBc = cell_bar(3,i)
-            distveG2=sqrt((xBc-xS1)**2+(yBc-yS1)**2+(zBc-zS1)**2)
-            if ((distveG2.LT.(5.D0/(1000.D0*LSTAR))).and.(scar_cell(i).ne.2)) then
-!               IstimEF_3d(i)=-60.D0
-               !IstimEF_3dS1(i)=-0.30D0 !minimal stimolo
-               IstimEF_3dS1(i)=-1.0D0 !minimal stimolo 
-            endif
-         endif
-      enddo
-      !@cuf istat = cudaDeviceSynchronize !JDR TMP
-
-      !Third point
-      read(15,*) xS1,yS1,zS1      
-#ifdef USE_CUDA
-      !$cuf kernel do (1) 
-#endif
-      do i=cstart_3d(1),cend_3d(1)
-         
-         chamb = cell_to_chamb_3d(i)
-         if ((chamb.eq.1).or.(chamb.eq.3)) then
-         
-            xBc = cell_bar(1,i)
-            yBc = cell_bar(2,i)
-            zBc = cell_bar(3,i)
-            distveG2=sqrt((xBc-xS1)**2+(yBc-yS1)**2+(zBc-zS1)**2)
-            if ((distveG2.LT.(5.D0/(1000.D0*LSTAR))).and.(scar_cell(i).ne.2)) then
-!               IstimEF_3d(i)=-60.D0
-               !IstimEF_3dS1(i)=-0.30D0 !minimal stimolo
-               IstimEF_3dS1(i)=-1.0D0 !minimal stimolo 
-            endif
-         endif
-      enddo
-      !@cuf istat = cudaDeviceSynchronize !JDR TMP
-      
       read(15,*) dummy
       read(15,*) xS2,yS2,zS2
       read(15,*) dummy
@@ -2465,17 +2865,31 @@
       
       countSTE=0
       countSTElv=0
-      !IstimEF_3dS1(:) = 0.0D0
-      !IstimEF_3dS2(:) = 0.0D0
+      !IstimEF_3datria(:) = 0.0D0
+      IstimEF_3dS1(:)    = 0.0D0
+      IstimEF_3dS2(:)    = 0.0D0
+      CVcell(:,:)        = 0.0D0
+      CVnode(:,:)        = 0.0D0
+      CVrot(:,:)         = 0.0D0
+      CVdiv(:)           = 0.0D0
+      CVgrad_cell(:,:,:) = 0.0D0
+      CVgrad_node(:,:,:) = 0.0D0
+      LATface_3d(:)      = 0.0D0
+      LATnode_3d(:)      = 0.0D0
       !write(*,*) "countSTE = ", countSTE, countSTElv, countVent, nctot_3d
       write(*,*) "countSTE = ", countSTE, nctot_3d, real(countSTE)/real((cend_3d(1)-cstart_3d(1)))*100.d0
 #ifdef CARTO
-      scaleD=1.2D0/5.0D0
+      scaleD=0.9D0/5.0D0
       open(unit=15,file='meshes/CARTO_diffusivity_3d.txt',status='old')
       do i=vstart_3d(1),vend_3d(1)
          read(15,*) tmpDcart
-         CARTO_Dnode3d(i)=0.18D0*tmpDcart 
-         !CARTO_Dnode3d(i)=scaleD*tmpDcart 
+         if (vert_to_chamb_3d(i).eq.2) then
+            CARTO_Dnode3d(i)=0.18D0
+         elseif (vert_to_chamb_3d(i).ge.5) then
+            CARTO_Dnode3d(i)=0.000001D0
+         else
+            CARTO_Dnode3d(i)=scaleD*tmpDcart 
+         endif
       enddo
       close(15)
       write(*,*) 'CARTO diffusivity 3D loaded'
@@ -2537,60 +2951,6 @@
          if (chamb.eq.1.OR.chamb.eq.3) then
             countVent = countVent+1
          endif
-         ! f1=face_of_cell_3d(1,i)
-         ! f2=face_of_cell_3d(2,i)
-         ! f3=face_of_cell_3d(3,i)
-         ! f4=face_of_cell_3d(4,i)
-         ! xBc=cell_bar(1,i)
-         ! yBc=cell_bar(2,i)
-         ! zBc=cell_bar(3,i)
-
-         ! rin = 3.0D0*vol0_3d(i)/(sur_3d(f1)+sur_3d(f2)+sur_3d(f3)+sur_3d(f4))
-         
-         ! v1 = vert_of_cell_3d(1,i)
-         ! v2 = vert_of_cell_3d(2,i)
-         ! v3 = vert_of_cell_3d(3,i)
-         ! v4 = vert_of_cell_3d(4,i)
-
-         ! a0 = sqrt((xyz_3d(1,v2)-xyz_3d(1,v1))**2+&
-         !           (xyz_3d(2,v2)-xyz_3d(2,v1))**2+&
-         !           (xyz_3d(3,v2)-xyz_3d(3,v1))**2)
-         ! a1 = sqrt((xyz_3d(1,v3)-xyz_3d(1,v4))**2+&
-         !           (xyz_3d(2,v3)-xyz_3d(2,v4))**2+&
-         !           (xyz_3d(3,v3)-xyz_3d(3,v4))**2)
-         
-         ! b0 = sqrt((xyz_3d(1,v1)-xyz_3d(1,v4))**2+&
-         !           (xyz_3d(2,v1)-xyz_3d(2,v4))**2+&
-         !           (xyz_3d(3,v1)-xyz_3d(3,v4))**2)
-         ! b1 = sqrt((xyz_3d(1,v2)-xyz_3d(1,v3))**2+&
-         !           (xyz_3d(2,v2)-xyz_3d(2,v3))**2+&
-         !           (xyz_3d(3,v2)-xyz_3d(3,v3))**2)
-         
-         ! c0 = sqrt((xyz_3d(1,v1)-xyz_3d(1,v3))**2+&
-         !           (xyz_3d(2,v1)-xyz_3d(2,v3))**2+&
-         !           (xyz_3d(3,v1)-xyz_3d(3,v3))**2)
-         ! c1 = sqrt((xyz_3d(1,v2)-xyz_3d(1,v4))**2+&
-         !           (xyz_3d(2,v2)-xyz_3d(2,v4))**2+&
-         !           (xyz_3d(3,v2)-xyz_3d(3,v4))**2)
-
-         ! rout = sqrt(( a0*a1 + b0*b1 + c0*c1 )*&
-         !          (-a0*a1 + b0*b1 + c0*c1 )*&
-         !          ( a0*a1 - b0*b1 + c0*c1 )*&
-         !          ( a0*a1 + b0*b1 - c0*c1 )/(576.0D0*vol0_3d(i)**2))
-         
-         ! ! s1=sur_3d(f1)
-         ! ! s2=sur_3d(f2)
-         ! ! s3=sur_3d(f3)
-         ! ! s4=sur_3d(f4)
-         
-         ! ! supmin=min(s1,s2,s3,s4)
-         ! ! supmax=max(s1,s2,s3,s4)
-         
-         ! !ratios=supmin/supmax
-         ! ratios=(0.3D0-(rin/rout))/0.3D0 !Normalized with the optimal ratios for a regular tetrahedron
-         ! meshquality_3d(i) = ratios!vol0_3d(i)
-         ! if ((ratios.LT.0.10).OR.(supmin.LT.5E-4)) then                                 
-         !if (((vol0_3d(i).LT.0.5D0*avg_vol)).and.(ratios.LT.0.5D0)) then                                 
          if (vol0_3d(i).LT.0.15D0*avg_vol) then!.and.(ratios.LT.0.1D0*avg_skew)) then
             LabelStenosi(i)=1
             countSTE=countSTE+1
@@ -2600,97 +2960,46 @@
          endif
       
          if ((chamb.eq.1).or.(chamb.eq.3)) then
-         
-            ! v1 = vert_of_cell_3d(1,i)
-            ! v2 = vert_of_cell_3d(2,i)
-            ! v3 = vert_of_cell_3d(3,i)
-            ! v4 = vert_of_cell_3d(4,i)
-            
-            ! ! ----------------------------------------
-            ! ! V1
-            ! pxS1 = xyz_3d(1,v1)
-            ! pyS1 = xyz_3d(2,v1)
-            ! pzS1 = xyz_3d(3,v1)
-         
-            ! distS1 = sqrt( (pxS1-xS1)**2 + (pyS1-yS1)**2 + (pzS1-zS1)**2 )
-            ! distS2	= sqrt( (pxS1-xS2)**2 + (pyS1-yS2)**2 + (pzS1-zS2)**2 )
-            ! S11 = amplitudeS1*exp(-(st_dev3D*distS1*MFstim))
-            ! S21 = amplitudeS2*exp(-(st_dev3D*distS2*MFstim)) 
-            ! ! ----------------------------------------
-            ! ! V2
-            ! pxS1 = xyz_3d(1,v2)
-            ! pyS1 = xyz_3d(2,v2)
-            ! pzS1 = xyz_3d(3,v2)
-            
-            ! distS1 = sqrt( (pxS1-xS1)**2 + (pyS1-yS1)**2 + (pzS1-zS1)**2 )
-            ! distS2 = sqrt( (pxS1-xS2)**2 + (pyS1-yS2)**2 + (pzS1-zS2)**2 )
-            ! S12 = amplitudeS1*exp(-(st_dev3D*distS1*MFstim)) 
-            ! S22 = amplitudeS2*exp(-(st_dev3D*distS2*MFstim))
-            ! ! ----------------------------------------
-            ! ! V3
-            ! pxS1 = xyz_3d(1,v3)
-            ! pyS1 = xyz_3d(2,v3)
-            ! pzS1 = xyz_3d(3,v3)
-            
-            ! distS1 = sqrt( (pxS1-xS1)**2 + (pyS1-yS1)**2 + (pzS1-zS1)**2 )
-            ! distS2 = sqrt( (pxS1-xS2)**2 + (pyS1-yS2)**2 + (pzS1-zS2)**2 )
-            ! S13 = amplitudeS1*exp(-(st_dev3D*distS1*MFstim)) 
-            ! S23 = amplitudeS2*exp(-(st_dev3D*distS2*MFstim)) 
-            ! ! ----------------------------------------
-            ! ! V4
-            ! pxS1 = xyz_3d(1,v4)
-            ! pyS1 = xyz_3d(2,v4)
-            ! pzS1 = xyz_3d(3,v4)
-            
-            ! distS1 = sqrt( (pxS1-xS1)**2 + (pyS1-yS1)**2 + (pzS1-zS1)**2 )
-            ! distS2 = sqrt( (pxS1-xS2)**2 + (pyS1-yS2)**2 + (pzS1-zS2)**2 )
-            ! S14 = amplitudeS1*exp(-(st_dev3D*distS1*MFstim))
-            ! S24 = amplitudeS2*exp(-(st_dev3D*distS2*MFstim))
-            
-            ! IstimEF_3dS1(i) = -0.25D0*(S11+S12+S13+S14)
-            ! IstimEF_3dS2(i) = -0.25D0*(S21+S22+S23+S24)
             xBc = cell_bar(1,i)
             yBc = cell_bar(2,i)
             zBc = cell_bar(3,i)
-      !       distveG2=sqrt((xBc-xS1)**2+(yBc-yS1)**2+(zBc-zS1)**2)
-!             if ((distveG2.LT.(5.D0/(1000.D0*LSTAR))).and.(scar_cell(i).ne.2)) then
-! !               IstimEF_3d(i)=-60.D0
-!                !IstimEF_3dS1(i)=-0.30D0 !minimal stimolo
-!                IstimEF_3dS1(i)=-1.0D0 !minimal stimolo 
-!             endif
+            distveG2=sqrt((xBc-xS1)**2+(yBc-yS1)**2+(zBc-zS1)**2)
+            if ((distveG2.LT.(5.D0/(1000.D0*LSTAR))).and.(scar_cell(i).ne.2)) then
+!               IstimEF_3d(i)=-60.D0
+               IstimEF_3dS1(i)=-0.30D0 !minimal stimolo
+            endif
             distveG2=sqrt((xBc-xS2)**2+(yBc-yS2)**2+(zBc-zS2)**2)
             if ((distveG2.LT.(15.0D0/(1000.D0*LSTAR))).and.(scar_cell(i).ne.2)) then 
-               !               IstimEF_3d(i)=-60.D0
+!               IstimEF_3d(i)=-60.D0
                IstimEF_3dS2(i)=-0.30D0 !minimal stimolo
-
-            endif
+            endif            
          endif
-     
+         
       enddo
 !@cuf istat = cudaDeviceSynchronize !JDR TMP
 ! #endif
 
 #ifdef CARTO      
-! #ifdef USE_CUDA
-!       !$cuf kernel do (2) 
-! #endif
-!       do j=1,npt_abl
-!          do i=vstart_3d(1),vend_3d(1)
-!             xS1 = data_abl(1,j)
-!             yS1 = data_abl(2,j)
-!             zS1 = data_abl(3,j)
+#ifdef USE_CUDA
+      !$cuf kernel do (2) 
+#endif
+      do j=1,npt_abl
+         do i=vstart_3d(1),vend_3d(1)
+            xS1 = data_abl(1,j)
+            yS1 = data_abl(2,j)
+            zS1 = data_abl(3,j)
             
-!             xBc = xyz_3d(1,i)
-!             yBc = xyz_3d(2,i)
-!             zBc = xyz_3d(3,i)
-!             distveG2=sqrt((xBc-xS1)**2+(yBc-yS1)**2+(zBc-zS1)**2)
-!             if (distveG2.LT.(1.050D0*data_abl(4,j)/(1000.0D0*LSTAR))) then
-!                CARTO_Dnode3d(i)=0.00000001D0
-!             endif
+            xBc = xyz_3d(1,i)
+            yBc = xyz_3d(2,i)
+            zBc = xyz_3d(3,i)
+            distveG2=sqrt((xBc-xS1)**2+(yBc-yS1)**2+(zBc-zS1)**2)
+            if (distveG2.LT.(1.050D0*data_abl(4,j)/(1000.0D0*LSTAR))) then
+               !CARTO_Dnode3d(i)=0.00000001D0
+            endif
      
-!          enddo
-!       enddo
-!       !@cuf istat = cudaDeviceSynchronize !JDR TMP
+         enddo
+      enddo
+      !@cuf istat = cudaDeviceSynchronize !JDR TMP
 
       !$cuf kernel do (1)
       do i=cstart_3d(1),cend_3d(1)
@@ -3405,7 +3714,7 @@
          chamb=cell_to_chamb_3d(i)
          if (chamb.EQ.1) then
             c1minpot=minpotLV
-            ksig=ksig_LV
+            ksig=ksig_LV*CARTO_Dcell3d(i)/0.18D0
             eps0=eps0_LV
          elseif (chamb.EQ.2) then
             c1minpot=minpotLA
