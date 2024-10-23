@@ -113,7 +113,7 @@
       real(DP):: const4,const5,const6,const7,const8,const9
       real(DP):: const10,const11,const12,const13,const14,const15,const16,const17,const18,const19
       real(DP):: const20,const21,const22,const23,const24,const25,const26,const27,const28,const29
-      real(DP):: const30,const31,const32,app1,app2,app3,app4,app5
+      real(DP):: const30,const31,const32,const33,const34,const35,app1,app2,app3,app4,app5
       real(DP):: remod
 
       !------------------------------------------------------------------------------
@@ -1000,7 +1000,7 @@
 
         potEFcell_3d(i) = XEF_3d(1,i)
 #endif !TP06
-#ifdef MINIMAL_MODEL_AAA
+#ifdef MINIMAL_MODEL
            !minimal model
 !           Dij = 0.1171D0 !mm^2/ms
 !           Dij = 0.168D0 !mm^2/ms !Parameter Fig. 3c
@@ -1180,7 +1180,7 @@
       CONST14 =0.20d0;
       CONST15 =470.0d0;
       CONST16 =0.006d0;
-      CONST17 =0.10d0;
+      CONST17 =0.10d0;!*0.7D0/CARTO_Dcell3d(i);
       CONST18 =1.56d0;
       CONST19 =40.0d0;
       CONST20 =1.2d0;
@@ -1247,8 +1247,8 @@
          ALG6=1.00;
       endif
       ALG11 =  (1.00000 - ALG6)*(1.00000 - ( STA1*1.00000)/CONST24)+ ALG6*CONST25;
-      ALG13 = CONST26+( (CONST27 - CONST26)*(1.00000+ tanh( CONST28*(STA1 - CONST29))))/2.00000;!tau_w-
-      ALG17 = CONST33+( (CONST34 - CONST33)*(1.00000+ tanh( CONST30*(STA1 - CONST33))))/2.00000;!tau_w+
+      ALG13 = CONST26+ (CONST27 - CONST26)*(1.00000+ tanh( CONST28*(STA1 - CONST29)))/2.00000;!tau_w-
+      ALG17 = CONST33+ (CONST34 - CONST33)*(1.00000+ tanh( CONST30*(STA1 - CONST33)))/2.00000;!tau_w+
       app1=ALG17*ALG11*(1.0-ALG6);
       app2=(ALG17-ALG17*ALG6+ALG13*ALG6);
       app3=ALG13*ALG17;
@@ -1267,7 +1267,7 @@
       CONST4 = -83;
       CONST5 = 2.7;
 
-      remod=1.0D0!5.0D0*CARTO_Dcell3d(i)
+      remod=CARTO_Dcell3d(i)/0.14D0!/0.9D0!10.0D0/1.65D0*CARTO_Dcell3d(i)
       
       XEF_3d(1,i) = STA1 + dtMS*(remod*RAT1+rhspot/(CONST5-CONST4)); 
       XEF_3d(2,i) = STA2np1
@@ -1739,41 +1739,43 @@
         LATx  =  xgradlat/volcell/(1000.D0*LSTAR)
         LATy  =  ygradlat/volcell/(1000.D0*LSTAR)
         LATz  =  zgradlat/volcell/(1000.D0*LSTAR)
-        if ((LATx*LATx+LATy*LATy+LATz*LATz).gt.0.01d0) then
+        if ((LATx*LATx+LATy*LATy+LATz*LATz).gt.0.001d0) then
 
-           v1 = vert_of_cell_3d(1,i)
-           v2 =	vert_of_cell_3d(2,i)
-           v3 =	vert_of_cell_3d(3,i)
-           v4 =	vert_of_cell_3d(4,i)
-           lat_cell_vert(1) = LATnode_3d(v1)
-           lat_cell_vert(2) = LATnode_3d(v2)
-           lat_cell_vert(3) = LATnode_3d(v3)
-           lat_cell_vert(4) = LATnode_3d(v4)
-           indmax = maxloc(lat_cell_vert(:),1)
-           indmin = minloc(lat_cell_vert(:),1)
-           v_max = vert_of_cell_3d(indmax,i)
-           v_min = vert_of_cell_3d(indmin,i)
+!            v1 = vert_of_cell_3d(1,i)
+!            v2 =	vert_of_cell_3d(2,i)
+!            v3 =	vert_of_cell_3d(3,i)
+!            v4 =	vert_of_cell_3d(4,i)
+!            lat_cell_vert(1) = LATnode_3d(v1)
+!            lat_cell_vert(2) = LATnode_3d(v2)
+!            lat_cell_vert(3) = LATnode_3d(v3)
+!            lat_cell_vert(4) = LATnode_3d(v4)
+!            indmax = maxloc(lat_cell_vert(:),1)
+!            indmin = minloc(lat_cell_vert(:),1)
+!            v_max = vert_of_cell_3d(indmax,i)
+!            v_min = vert_of_cell_3d(indmin,i)
 
-#ifdef ELEGEO0
-        xV_max = xyz0_3d(1,v_max)
-        yV_max = xyz0_3d(2,v_max)
-        zV_max = xyz0_3d(3,v_max)
-        xV_min = xyz0_3d(1,v_min)
-        yV_min = xyz0_3d(2,v_min)
-        zV_min = xyz0_3d(3,v_min)
-#else   
-        xV_max = xyz_3d(1,v_max)
-        yV_max = xyz_3d(2,v_max)
-        zV_max = xyz_3d(3,v_max)  
-        xV_min = xyz_3d(1,v_min)
-        yV_min = xyz_3d(2,v_min)
-        zV_min = xyz_3d(3,v_min)
-#endif 
-        dxlat= (xV_max-xV_min)*LATx/modgradlat
-        dylat= (yV_max-yV_min)*LATy/modgradlat
-        dzlat= (zV_max-zV_min)*LATz/modgradlat
-        cvmod =  sqrt(dxlat*dxlat+dylat*dylat+dzlat*dzlat)/&
-                 (LATnode_3d(v_max)-LATnode_3d(v_min))/modgradlat
+! #ifdef ELEGEO0
+!         xV_max = xyz0_3d(1,v_max)
+!         yV_max = xyz0_3d(2,v_max)
+!         zV_max = xyz0_3d(3,v_max)
+!         xV_min = xyz0_3d(1,v_min)
+!         yV_min = xyz0_3d(2,v_min)
+!         zV_min = xyz0_3d(3,v_min)
+! #else   
+!         xV_max = xyz_3d(1,v_max)
+!         yV_max = xyz_3d(2,v_max)
+!         zV_max = xyz_3d(3,v_max)  
+!         xV_min = xyz_3d(1,v_min)
+!         yV_min = xyz_3d(2,v_min)
+!         zV_min = xyz_3d(3,v_min)
+! #endif 
+!         dxlat= (xV_max-xV_min)*LATx/modgradlat
+!         dylat= (yV_max-yV_min)*LATy/modgradlat
+!         dzlat= (zV_max-zV_min)*LATz/modgradlat
+!         cvmod =  sqrt(dxlat*dxlat+dylat*dylat+dzlat*dzlat)/&
+!                  (LATnode_3d(v_max)-LATnode_3d(v_min))/modgradlat
+!         cvmod = 1.0d0
+           cvmod=1/(LATx*LATx+LATy*LATy+LATz*LATz)
         else
            cvmod = 0.0d0
         endif
@@ -1989,23 +1991,23 @@
            endif !MOD_BC
         enddo
 
-        CVgrad_node(1,1,i)=grad11
-        CVgrad_node(1,2,i)=grad12
-        CVgrad_node(1,3,i)=grad13
+        CVgrad_node(1,1,i)=grad11/den
+        CVgrad_node(1,2,i)=grad12/den
+        CVgrad_node(1,3,i)=grad13/den
 
-        CVgrad_node(2,1,i)=grad21
-        CVgrad_node(2,2,i)=grad22
-        CVgrad_node(2,3,i)=grad23
+        CVgrad_node(2,1,i)=grad21/den
+        CVgrad_node(2,2,i)=grad22/den
+        CVgrad_node(2,3,i)=grad23/den
         
-        CVgrad_node(3,1,i)=grad31
-        CVgrad_node(3,2,i)=grad32
-        CVgrad_node(3,3,i)=grad33
+        CVgrad_node(3,1,i)=grad31/den
+        CVgrad_node(3,2,i)=grad32/den
+        CVgrad_node(3,3,i)=grad33/den
 
-        CVdiv(i)   = grad11 + grad22 + grad33
+        CVdiv(i)   = grad11/den + grad22/den + grad33/den
 
-        CVrot(1,i) = grad32 - grad23
-        CVrot(2,i) = grad13 - grad31
-        CVrot(3,i) = grad21 - grad12
+        CVrot(1,i) = grad32/den - grad23/den
+        CVrot(2,i) = grad13/den - grad31/den
+        CVrot(3,i) = grad21/den - grad12/den
         
      enddo
      !@cuf istat = cudaDeviceSynchronize !JDR TMP
@@ -2545,7 +2547,7 @@
       real(DP):: xC1,yC1,zC1
       real(DP):: xV1,yV1,zV1
       integer:: step,j
-      real(DP):: num,den,dvvjj
+      real(DP):: num,den,dvvjj,tmp
       
       
       !-------------------------------------------------------
@@ -2647,7 +2649,7 @@
 
             potEFcell_3d(i) = XEF_3d(1,i)
 #endif
-#ifdef MINIMAL_MODEL_AAA
+#ifdef MINIMAL_MODEL
             XEF_3d(1,i) = 0.0D0;
             XEF_3d(2,i) = 1.0D0;
             XEF_3d(3,i) = 1.0D0;
@@ -2879,16 +2881,25 @@
       !write(*,*) "countSTE = ", countSTE, countSTElv, countVent, nctot_3d
       write(*,*) "countSTE = ", countSTE, nctot_3d, real(countSTE)/real((cend_3d(1)-cstart_3d(1)))*100.d0
 #ifdef CARTO
-      scaleD=0.9D0/5.0D0
+      scaleD=0.15D0!0.90D0!.5D0/5.0D0
       open(unit=15,file='meshes/CARTO_diffusivity_3d.txt',status='old')
       do i=vstart_3d(1),vend_3d(1)
          read(15,*) tmpDcart
          if (vert_to_chamb_3d(i).eq.2) then
-            CARTO_Dnode3d(i)=0.18D0
+            CARTO_Dnode3d(i)=0.15D0
          elseif (vert_to_chamb_3d(i).ge.5) then
             CARTO_Dnode3d(i)=0.000001D0
          else
-            CARTO_Dnode3d(i)=scaleD*tmpDcart 
+            !if (tmpDcart.lt.0.45D0) then
+            !   CARTO_Dnode3d(i)=scaleD*(0.25D0+tmpDcart)
+            !else
+            tmp = scaleD*(tmpDcart-1.0D0)+0.14D0
+            if (tmp.lt.0.0001D0) then
+               CARTO_Dnode3d(i) = tmpDcart*0.09d0
+            else
+               CARTO_Dnode3d(i) = tmp
+            endif
+            
          endif
       enddo
       close(15)
@@ -2966,12 +2977,12 @@
             distveG2=sqrt((xBc-xS1)**2+(yBc-yS1)**2+(zBc-zS1)**2)
             if ((distveG2.LT.(5.D0/(1000.D0*LSTAR))).and.(scar_cell(i).ne.2)) then
 !               IstimEF_3d(i)=-60.D0
-               IstimEF_3dS1(i)=-0.30D0 !minimal stimolo
+               IstimEF_3dS1(i)=-1.00D0 !minimal stimolo
             endif
             distveG2=sqrt((xBc-xS2)**2+(yBc-yS2)**2+(zBc-zS2)**2)
             if ((distveG2.LT.(15.0D0/(1000.D0*LSTAR))).and.(scar_cell(i).ne.2)) then 
 !               IstimEF_3d(i)=-60.D0
-               IstimEF_3dS2(i)=-0.30D0 !minimal stimolo
+               IstimEF_3dS2(i)=-1.00D0 !minimal stimolo
             endif            
          endif
          
