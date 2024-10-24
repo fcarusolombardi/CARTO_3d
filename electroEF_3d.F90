@@ -136,10 +136,14 @@
 !geometriche del dominio chiamando le routines che sono alla fine di read_geoSingleBody_3d
 !tutto è predisposto, manca solo un modo per aggiornare/seguire l'orientamento delle fibre 
 
-
 !#ifdef S1S2-3D
       open(unit=15,file='S1S2_3dStim.in',status='old')
       read(15,*) dummy
+      !S1p1
+      read(15,*) dummy
+      !S1p2
+      read(15,*) dummy
+      !S1p3
       read(15,*) dummy
       read(15,*) dummy
       read(15,*) dummy
@@ -151,6 +155,7 @@
       read(15,*) duration_signal_S1,duration_signal_S2,delayS2
       close(15)
 !#endif
+
       treshold_apd = -79.0D0
 !      delayS2=60.0D0/delayS2*1000.0D0
 #ifdef TP06      
@@ -667,12 +672,12 @@
             if ((timeMS.GT.0.0D0).AND.(timeMS.LT.0.0D0+duration_signal_S1)) then
                !Istim = IstimEF_3d(i)!+IstimEF_3dS1(i)
                Istim = IstimEF_3dS1(i)
-            elseif ((timeMS.GT.delayS2+0.0D0).AND.(timeMS.LT.delayS2+duration_signal_S2+0.0D0)) then
-                !Istim = IstimEF_3d(i)+IstimEF_3dS2(i)
-                !Istim = IstimEF_3dS2(i)
-               Istim = IstimEF_3dS2(i)
-            else
-               !Istim = IstimEF_3d(i)
+            ! elseif ((timeMS.GT.delayS2+0.0D0).AND.(timeMS.LT.delayS2+duration_signal_S2+0.0D0)) then
+            !     !Istim = IstimEF_3d(i)+IstimEF_3dS2(i)
+            !     !Istim = IstimEF_3dS2(i)
+            !    Istim = IstimEF_3dS2(i)
+             else
+            !    !Istim = IstimEF_3d(i)
                Istim = 0.0D0
             endif
          else
@@ -1168,7 +1173,7 @@
       !      CONST32 =6.00;
       ! endif
       
-      CONST6 = 0.3d0;
+      CONST6 = 0.5d0;!0.3d0; Elongation of APD
       CONST7 = 0.13d0;
       CONST8 = 1.4506d0;
       CONST9 = 2.7342d0;
@@ -2772,10 +2777,91 @@
       astressEFcell_3d(:)=0.D0
       astressEFnode_3d(:)=0.D0
       astressEFedge_3d(:)=0.D0
+
+      IstimEF_3dS1(:)    = 0.0D0
+      IstimEF_3dS2(:)    = 0.0D0
+      CVcell(:,:)        = 0.0D0
+      CVnode(:,:)        = 0.0D0
+      CVrot(:,:)         = 0.0D0
+      CVdiv(:)           = 0.0D0
+      CVgrad_cell(:,:,:) = 0.0D0
+      CVgrad_node(:,:,:) = 0.0D0
+      LATface_3d(:)      = 0.0D0
+      LATnode_3d(:)      = 0.0D0
+      
 !#ifdef S1S2-3D
       open(unit=15,file='S1S2_3dStim.in',status='old')
+      
       read(15,*) dummy
       read(15,*) xS1,yS1,zS1
+      !First point
+#ifdef USE_CUDA
+      !$cuf kernel do (1) 
+#endif
+      do i=cstart_3d(1),cend_3d(1)
+         
+         chamb = cell_to_chamb_3d(i)
+         if ((chamb.eq.1).or.(chamb.eq.3)) then
+         
+            xBc = cell_bar(1,i)
+            yBc = cell_bar(2,i)
+            zBc = cell_bar(3,i)
+            distveG2=sqrt((xBc-xS1)**2+(yBc-yS1)**2+(zBc-zS1)**2)
+            if ((distveG2.LT.(5.D0/(1000.D0*LSTAR))).and.(scar_cell(i).ne.2)) then
+!               IstimEF_3d(i)=-60.D0
+               !IstimEF_3dS1(i)=-0.30D0 !minimal stimolo
+               IstimEF_3dS1(i)=-1.0D0 !minimal stimolo 
+            endif
+         endif
+      enddo
+      !@cuf istat = cudaDeviceSynchronize !JDR TMP
+
+      !Second point
+      read(15,*) xS1,yS1,zS1      
+#ifdef USE_CUDA
+      !$cuf kernel do (1) 
+#endif
+      do i=cstart_3d(1),cend_3d(1)
+         
+         chamb = cell_to_chamb_3d(i)
+         if ((chamb.eq.1).or.(chamb.eq.3)) then
+         
+            xBc = cell_bar(1,i)
+            yBc = cell_bar(2,i)
+            zBc = cell_bar(3,i)
+            distveG2=sqrt((xBc-xS1)**2+(yBc-yS1)**2+(zBc-zS1)**2)
+            if ((distveG2.LT.(5.D0/(1000.D0*LSTAR))).and.(scar_cell(i).ne.2)) then
+!               IstimEF_3d(i)=-60.D0
+               !IstimEF_3dS1(i)=-0.30D0 !minimal stimolo
+               IstimEF_3dS1(i)=-1.0D0 !minimal stimolo 
+            endif
+         endif
+      enddo
+      !@cuf istat = cudaDeviceSynchronize !JDR TMP
+
+      !Third point
+      read(15,*) xS1,yS1,zS1      
+#ifdef USE_CUDA
+      !$cuf kernel do (1) 
+#endif
+      do i=cstart_3d(1),cend_3d(1)
+         
+         chamb = cell_to_chamb_3d(i)
+         if ((chamb.eq.1).or.(chamb.eq.3)) then
+         
+            xBc = cell_bar(1,i)
+            yBc = cell_bar(2,i)
+            zBc = cell_bar(3,i)
+            distveG2=sqrt((xBc-xS1)**2+(yBc-yS1)**2+(zBc-zS1)**2)
+            if ((distveG2.LT.(5.D0/(1000.D0*LSTAR))).and.(scar_cell(i).ne.2)) then
+!               IstimEF_3d(i)=-60.D0
+               !IstimEF_3dS1(i)=-0.30D0 !minimal stimolo
+               IstimEF_3dS1(i)=-1.0D0 !minimal stimolo 
+            endif
+         endif
+      enddo
+      !@cuf istat = cudaDeviceSynchronize !JDR TMP
+      
       read(15,*) dummy
       read(15,*) xS2,yS2,zS2
       read(15,*) dummy
@@ -2868,16 +2954,8 @@
       countSTE=0
       countSTElv=0
       !IstimEF_3datria(:) = 0.0D0
-      IstimEF_3dS1(:)    = 0.0D0
-      IstimEF_3dS2(:)    = 0.0D0
-      CVcell(:,:)        = 0.0D0
-      CVnode(:,:)        = 0.0D0
-      CVrot(:,:)         = 0.0D0
-      CVdiv(:)           = 0.0D0
-      CVgrad_cell(:,:,:) = 0.0D0
-      CVgrad_node(:,:,:) = 0.0D0
-      LATface_3d(:)      = 0.0D0
-      LATnode_3d(:)      = 0.0D0
+      !IstimEF_3dS1(:)    = 0.0D0
+
       !write(*,*) "countSTE = ", countSTE, countSTElv, countVent, nctot_3d
       write(*,*) "countSTE = ", countSTE, nctot_3d, real(countSTE)/real((cend_3d(1)-cstart_3d(1)))*100.d0
 #ifdef CARTO
@@ -2974,11 +3052,11 @@
             xBc = cell_bar(1,i)
             yBc = cell_bar(2,i)
             zBc = cell_bar(3,i)
-            distveG2=sqrt((xBc-xS1)**2+(yBc-yS1)**2+(zBc-zS1)**2)
-            if ((distveG2.LT.(5.D0/(1000.D0*LSTAR))).and.(scar_cell(i).ne.2)) then
-!               IstimEF_3d(i)=-60.D0
-               IstimEF_3dS1(i)=-1.00D0 !minimal stimolo
-            endif
+!             distveG2=sqrt((xBc-xS1)**2+(yBc-yS1)**2+(zBc-zS1)**2)
+!             if ((distveG2.LT.(5.D0/(1000.D0*LSTAR))).and.(scar_cell(i).ne.2)) then
+! !               IstimEF_3d(i)=-60.D0
+!                IstimEF_3dS1(i)=-1.00D0 !minimal stimolo
+!             endif
             distveG2=sqrt((xBc-xS2)**2+(yBc-yS2)**2+(zBc-zS2)**2)
             if ((distveG2.LT.(15.0D0/(1000.D0*LSTAR))).and.(scar_cell(i).ne.2)) then 
 !               IstimEF_3d(i)=-60.D0
