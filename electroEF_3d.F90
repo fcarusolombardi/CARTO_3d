@@ -1195,7 +1195,7 @@
       CONST24 =0.0273d0;
       CONST25 =0.78d0;
       CONST26 =40.0d0*(1.0+0.1d0*abs((1.0d0-CARTO_Dcell3d(i)/0.14d0)));
-      CONST27 =115.0d0*(1.0+0.1d0*abs((1.0d0-CARTO_Dcell3d(i)/0.14d0)));
+      CONST27 =115.0d0!*(1.0+0.1d0*abs((1.0d0-CARTO_Dcell3d(i)/0.14d0)));
       CONST28 =20.0d0;
       CONST29 =0.00615d0;
       CONST30 =8.0d0;

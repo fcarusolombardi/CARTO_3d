@@ -363,9 +363,9 @@ pesoAV = dt/tframe
          enddo
       
          if(myid.eq.0) write(95,104)timeMS,pressLV,pressAO,pressLA,pressRV,pressAP,pressRA,Volume_chamb(1),Volume_chamb(2),Volume_chamb(3),Volume_chamb(4),&
-              potEFnode(48475),& !Healthy
-              potEFnode(43144),& !Scar core
-              potEFnode(45278)   !Healtier Istmus
+              potEFnode_3d(48475),& !Healthy
+              potEFnode_3d(43144),& !Scar core
+              potEFnode_3d(45278)   !Healtier Istmus
          if(myid.eq.0) flush(95)
 
 !         stop
