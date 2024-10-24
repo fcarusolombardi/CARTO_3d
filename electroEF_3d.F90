@@ -1173,7 +1173,7 @@
       !      CONST32 =6.00;
       ! endif
       slowing=1.0D0
-      CONST6 = 0.3d0+0.1d0*abs((1.0d0-CARTO_Dcell3d(i)/0.14d0));!0.3d0; Elongation of APD
+      CONST6 = 0.3d0!+0.1d0*abs((1.0d0-CARTO_Dcell3d(i)/0.14d0));!0.3d0; Elongation of APD
       CONST7 = 0.13d0;
       CONST8 = 1.4506d0;
       CONST9 = 2.7342d0;
@@ -1194,8 +1194,8 @@
       CONST23 =2.9013d0;
       CONST24 =0.0273d0;
       CONST25 =0.78d0;
-      CONST26 =40.0d0+10.0D0*abs((1.0d0-CARTO_Dcell3d(i)/0.14d0));
-      CONST27 =115.0d0+100.0d0*abs((1.0d0-CARTO_Dcell3d(i)/0.14d0));
+      CONST26 =40.0d0*(1.0+0.1d0*abs((1.0d0-CARTO_Dcell3d(i)/0.14d0)));
+      CONST27 =115.0d0*(1.0+0.1d0*abs((1.0d0-CARTO_Dcell3d(i)/0.14d0)));
       CONST28 =20.0d0;
       CONST29 =0.00615d0;
       CONST30 =8.0d0;
