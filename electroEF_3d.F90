@@ -114,7 +114,7 @@
       real(DP):: const10,const11,const12,const13,const14,const15,const16,const17,const18,const19
       real(DP):: const20,const21,const22,const23,const24,const25,const26,const27,const28,const29
       real(DP):: const30,const31,const32,const33,const34,const35,app1,app2,app3,app4,app5
-      real(DP):: remod
+      real(DP):: remod,slowing
 
       !------------------------------------------------------------------------------
 #ifdef MITCHELL_SCHAEFFER
@@ -1172,8 +1172,8 @@
       !      CONST31 =60.00;
       !      CONST32 =6.00;
       ! endif
-      
-      CONST6 = 0.5d0;!0.3d0; Elongation of APD
+      slowing=1.0D0
+      CONST6 = 0.3d0+0.1d0*abs((1.0d0-CARTO_Dcell3d(i)/0.14d0));!0.3d0; Elongation of APD
       CONST7 = 0.13d0;
       CONST8 = 1.4506d0;
       CONST9 = 2.7342d0;
@@ -1183,26 +1183,26 @@
       CONST12 =2.0d0;
       CONST13 =40.0d0;
       CONST14 =0.20d0;
-      CONST15 =470.0d0;
+      CONST15 =slowing*470.0d0!+100*abs((1.0d0-CARTO_Dcell3d(i)/0.14d0));
       CONST16 =0.006d0;
       CONST17 =0.10d0;!*0.7D0/CARTO_Dcell3d(i);
       CONST18 =1.56d0;
-      CONST19 =40.0d0;
-      CONST20 =1.2d0;
+      CONST19 =slowing*40.0d0!+10*abs((1.0d0-CARTO_Dcell3d(i)/0.14d0));
+      CONST20 =slowing*1.2d0!+abs((1.0d0-CARTO_Dcell3d(i)/0.14d0));
       CONST21 =2.0d0;
       CONST22 =0.65d0;
       CONST23 =2.9013d0;
       CONST24 =0.0273d0;
       CONST25 =0.78d0;
-      CONST26 =40.0d0;
-      CONST27 =115.0d0;
+      CONST26 =40.0d0+10.0D0*abs((1.0d0-CARTO_Dcell3d(i)/0.14d0));
+      CONST27 =115.0d0+100.0d0*abs((1.0d0-CARTO_Dcell3d(i)/0.14d0));
       CONST28 =20.0d0;
       CONST29 =0.00615d0;
       CONST30 =8.0d0;
       CONST31 =55.0d0;
       
       !Added for tau_w+
-      CONST32 =6.0d0;
+      CONST32 =slowing*6.0d0;
       CONST33 =0.0005d0;
       CONST34 =175.0d0;
       CONST35 =230.0d0;
