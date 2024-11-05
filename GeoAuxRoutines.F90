@@ -504,24 +504,6 @@ endif
            read(109,*) AmatrFibers_node_3d(3,1,i)
            !AmatrFibers_node_3d(3,1,i) = 0.d0
         end do
-        read(109,*) !sheetx
-        read(109,*) !sheetx
-        do i=1,nvtot_3d
-           read(109,*) AmatrFibers_node_3d(1,2,i)
-           !AmatrFibers_node_3d(1,2,i) = 0.d0
-        end do
-        read(109,*) !sheety
-        read(109,*) !sheety
-        do i=1,nvtot_3d
-           read(109,*) AmatrFibers_node_3d(2,2,i)
-           !AmatrFibers_node_3d(2,2,i) = 1.d0
-        end do
-        read(109,*) !sheetz
-        read(109,*) !sheetz
-        do i=1,nvtot_3d
-           read(109,*) AmatrFibers_node_3d(3,2,i)
-           !AmatrFibers_node_3d(3,2,i) = 0.d0
-        end do
         read(109,*) !normalsheetx
         read(109,*) !normalsheetx
         do i=1,nvtot_3d
@@ -540,6 +522,42 @@ endif
            read(109,*) AmatrFibers_node_3d(3,3,i)
            !AmatrFibers_node_3d(3,3,i) = 1.d0
         end do
+        read(109,*) !sheetx
+        read(109,*) !sheetx
+        do i=1,nvtot_3d
+           read(109,*) AmatrFibers_node_3d(1,2,i)
+           !AmatrFibers_node_3d(1,2,i) = 0.d0
+        end do
+        read(109,*) !sheety
+        read(109,*) !sheety
+        do i=1,nvtot_3d
+           read(109,*) AmatrFibers_node_3d(2,2,i)
+           !AmatrFibers_node_3d(2,2,i) = 1.d0
+        end do
+        read(109,*) !sheetz
+        read(109,*) !sheetz
+        do i=1,nvtot_3d
+           read(109,*) AmatrFibers_node_3d(3,2,i)
+           !AmatrFibers_node_3d(3,2,i) = 0.d0
+        end do
+        ! read(109,*) !normalsheetx
+        ! read(109,*) !normalsheetx
+        ! do i=1,nvtot_3d
+        !    read(109,*) AmatrFibers_node_3d(1,3,i)
+        !    !AmatrFibers_node_3d(1,3,i) = 0.d0
+        ! end do
+        ! read(109,*) !normalsheety
+        ! read(109,*) !normalsheety
+        ! do i=1,nvtot_3d
+        !    read(109,*) AmatrFibers_node_3d(2,3,i)
+        !    !AmatrFibers_node_3d(2,3,i) = 0.d0
+        ! end do
+        ! read(109,*) !normalsheetz
+        ! read(109,*) !normalsheetz        
+        ! do i=1,nvtot_3d
+        !    read(109,*) AmatrFibers_node_3d(3,3,i)
+        !    !AmatrFibers_node_3d(3,3,i) = 1.d0
+        ! end do
 
         close(109)
 ! #else

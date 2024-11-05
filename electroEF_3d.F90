@@ -2807,7 +2807,7 @@
             yBc = cell_bar(2,i)
             zBc = cell_bar(3,i)
             distveG2=sqrt((xBc-xS1)**2+(yBc-yS1)**2+(zBc-zS1)**2)
-            if ((distveG2.LT.(5.D0/(1000.D0*LSTAR))).and.(scar_cell(i).ne.2)) then
+            if ((distveG2.LT.(1.0D0/(1000.D0*LSTAR))).and.(scar_cell(i).ne.2)) then
 !               IstimEF_3d(i)=-60.D0
                !IstimEF_3dS1(i)=-0.30D0 !minimal stimolo
                IstimEF_3dS1(i)=-1.0D0 !minimal stimolo 
@@ -2832,7 +2832,7 @@
             yBc = cell_bar(2,i)
             zBc = cell_bar(3,i)
             distveG2=sqrt((xBc-xS1)**2+(yBc-yS1)**2+(zBc-zS1)**2)
-            if ((distveG2.LT.(5.D0/(1000.D0*LSTAR))).and.(scar_cell(i).ne.2)) then
+            if ((distveG2.LT.(1.D0/(1000.D0*LSTAR))).and.(scar_cell(i).ne.2)) then
 !               IstimEF_3d(i)=-60.D0
                !IstimEF_3dS1(i)=-0.30D0 !minimal stimolo
                IstimEF_3dS1(i)=-1.0D0 !minimal stimolo 
@@ -2855,7 +2855,7 @@
             yBc = cell_bar(2,i)
             zBc = cell_bar(3,i)
             distveG2=sqrt((xBc-xS1)**2+(yBc-yS1)**2+(zBc-zS1)**2)
-            if ((distveG2.LT.(5.D0/(1000.D0*LSTAR))).and.(scar_cell(i).ne.2)) then
+            if ((distveG2.LT.(1.D0/(1000.D0*LSTAR))).and.(scar_cell(i).ne.2)) then
 !               IstimEF_3d(i)=-60.D0
                !IstimEF_3dS1(i)=-0.30D0 !minimal stimolo
                IstimEF_3dS1(i)=-1.0D0 !minimal stimolo 
@@ -3410,11 +3410,13 @@
             sigma_n=sigma_f/7.5779D0
             sigma_s=sigma_f/7.5779D0
 #ifdef CARTO
-            sigma_f=1.0D0
-            sigma_s=1.0D0
-            sigma_n=1.0D0
+         parco = 1.0d0
+         sigma_f = CARTO_Dcell3d(i)
+         sigma_s = CARTO_Dcell3d(i)
+         sigma_n = 0.1D0*CARTO_Dcell3d(i)
 #endif
-            if (minf.GE.1) then
+
+         if (minf.GE.1) then
                v1=vert_of_cell_3d(1,i)
                v2=vert_of_cell_3d(2,i)
                v3=vert_of_cell_3d(3,i)
