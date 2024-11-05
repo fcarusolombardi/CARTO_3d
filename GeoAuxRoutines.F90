@@ -483,7 +483,7 @@ endif
 
 
 #ifdef FIBERS
-#ifndef CARTO
+!#ifndef CARTO
         !Fibers nodes
         open(109,file='meshes/'//trim(geofile_3d(inp))//'_fibers.txt')
         read(109,*) !fiberx
@@ -542,62 +542,62 @@ endif
         end do
 
         close(109)
-#else
-        !$cuf kernel do (1) 
-        do i=1,nvtot_3d
-!           read(109,*) AmatrFibers_node_3d(1,1,i)
-           AmatrFibers_node_3d(1,1,i) = 1.d0
-        end do
-        !@cuf istat = cudaDeviceSynchronize !JDR TMP
-        !$cuf kernel do (1) 
-        do i=1,nvtot_3d
-           ! read(109,*) AmatrFibers_node_3d(2,1,i)
-           AmatrFibers_node_3d(2,1,i) = 0.d0
-        end do
-        !@cuf istat = cudaDeviceSynchronize !JDR TMP
-        !$cuf kernel do (1) 
-        do i=1,nvtot_3d
-           ! read(109,*) AmatrFibers_node_3d(3,1,i)
-           AmatrFibers_node_3d(3,1,i) = 0.d0
-        end do
-        !@cuf istat = cudaDeviceSynchronize !JDR TMP
-        !$cuf kernel do (1) 
-        do i=1,nvtot_3d
-           ! read(109,*) AmatrFibers_node_3d(1,2,i)
-           AmatrFibers_node_3d(1,2,i) = 0.d0
-        end do
-        !@cuf istat = cudaDeviceSynchronize !JDR TMP
-        !$cuf kernel do (1) 
-        do i=1,nvtot_3d
-           ! read(109,*) AmatrFibers_node_3d(2,2,i)
-           AmatrFibers_node_3d(2,2,i) = 1.d0
-        end do
-        !@cuf istat = cudaDeviceSynchronize !JDR TMP
-        !$cuf kernel do (1) 
-        do i=1,nvtot_3d
-           ! read(109,*) AmatrFibers_node_3d(3,2,i)
-           AmatrFibers_node_3d(3,2,i) = 0.d0
-        end do
-        !@cuf istat = cudaDeviceSynchronize !JDR TMP
-        !$cuf kernel do (1) 
-        do i=1,nvtot_3d
-           ! read(109,*) AmatrFibers_node_3d(1,3,i)
-           AmatrFibers_node_3d(1,3,i) = 0.d0
-        end do
-        !@cuf istat = cudaDeviceSynchronize !JDR TMP
-        !$cuf kernel do (1) 
-        do i=1,nvtot_3d
-           ! read(109,*) AmatrFibers_node_3d(2,3,i)
-           AmatrFibers_node_3d(2,3,i) = 0.d0
-        end do
-        !@cuf istat = cudaDeviceSynchronize !JDR TMP
-        !$cuf kernel do (1) 
-        do i=1,nvtot_3d
-           ! read(109,*) AmatrFibers_node_3d(3,3,i)
-           AmatrFibers_node_3d(3,3,i) = 1.d0
-        end do
-        !@cuf istat = cudaDeviceSynchronize !JDR TMP
-#endif
+! #else
+!         !$cuf kernel do (1) 
+!         do i=1,nvtot_3d
+! !           read(109,*) AmatrFibers_node_3d(1,1,i)
+!            AmatrFibers_node_3d(1,1,i) = 1.d0
+!         end do
+!         !@cuf istat = cudaDeviceSynchronize !JDR TMP
+!         !$cuf kernel do (1) 
+!         do i=1,nvtot_3d
+!            ! read(109,*) AmatrFibers_node_3d(2,1,i)
+!            AmatrFibers_node_3d(2,1,i) = 0.d0
+!         end do
+!         !@cuf istat = cudaDeviceSynchronize !JDR TMP
+!         !$cuf kernel do (1) 
+!         do i=1,nvtot_3d
+!            ! read(109,*) AmatrFibers_node_3d(3,1,i)
+!            AmatrFibers_node_3d(3,1,i) = 0.d0
+!         end do
+!         !@cuf istat = cudaDeviceSynchronize !JDR TMP
+!         !$cuf kernel do (1) 
+!         do i=1,nvtot_3d
+!            ! read(109,*) AmatrFibers_node_3d(1,2,i)
+!            AmatrFibers_node_3d(1,2,i) = 0.d0
+!         end do
+!         !@cuf istat = cudaDeviceSynchronize !JDR TMP
+!         !$cuf kernel do (1) 
+!         do i=1,nvtot_3d
+!            ! read(109,*) AmatrFibers_node_3d(2,2,i)
+!            AmatrFibers_node_3d(2,2,i) = 1.d0
+!         end do
+!         !@cuf istat = cudaDeviceSynchronize !JDR TMP
+!         !$cuf kernel do (1) 
+!         do i=1,nvtot_3d
+!            ! read(109,*) AmatrFibers_node_3d(3,2,i)
+!            AmatrFibers_node_3d(3,2,i) = 0.d0
+!         end do
+!         !@cuf istat = cudaDeviceSynchronize !JDR TMP
+!         !$cuf kernel do (1) 
+!         do i=1,nvtot_3d
+!            ! read(109,*) AmatrFibers_node_3d(1,3,i)
+!            AmatrFibers_node_3d(1,3,i) = 0.d0
+!         end do
+!         !@cuf istat = cudaDeviceSynchronize !JDR TMP
+!         !$cuf kernel do (1) 
+!         do i=1,nvtot_3d
+!            ! read(109,*) AmatrFibers_node_3d(2,3,i)
+!            AmatrFibers_node_3d(2,3,i) = 0.d0
+!         end do
+!         !@cuf istat = cudaDeviceSynchronize !JDR TMP
+!         !$cuf kernel do (1) 
+!         do i=1,nvtot_3d
+!            ! read(109,*) AmatrFibers_node_3d(3,3,i)
+!            AmatrFibers_node_3d(3,3,i) = 1.d0
+!         end do
+!         !@cuf istat = cudaDeviceSynchronize !JDR TMP
+!#endif
         !Fibers cells
         !$cuf kernel do (1) 
         do i=1,nctot_3d

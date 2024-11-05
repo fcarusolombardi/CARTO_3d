@@ -720,21 +720,21 @@
            mint32 = Mintfaces_3d(3,2,f1)
            mint33 = Mintfaces_3d(3,3,f1)
 #ifdef CARTO
-!              bordo = bordo + &
-!                   CARTO_Dcell3d(i)*(  xnormale*(mint11*xgrad + mint12*ygrad + mint13*zgrad) &
-!                    + ynormale*(mint21*xgrad + mint22*ygrad + mint23*zgrad) &
-! #ifdef ELEGEO0                
-!                    + znormale*(mint31*xgrad + mint32*ygrad + mint33*zgrad) )*sur0_3d(f1)
-! #else
-!               + znormale*(mint31*xgrad + mint32*ygrad + mint33*zgrad) )*sur_3d(f1)
-! #endif
              bordo = bordo + &
-                  CARTO_Dface3d(f1)*(  xnormale*xgrad + ynormale*ygrad &
+                  (  xnormale*(mint11*xgrad + mint12*ygrad + mint13*zgrad) &
+                   + ynormale*(mint21*xgrad + mint22*ygrad + mint23*zgrad) &
 #ifdef ELEGEO0                
-                  + znormale*zgrad )*sur0_3d(f1)
+                   + znormale*(mint31*xgrad + mint32*ygrad + mint33*zgrad) )*sur0_3d(f1)
 #else
-                  + znormale*zgrad )*sur_3d(f1)
+              + znormale*(mint31*xgrad + mint32*ygrad + mint33*zgrad) )*sur_3d(f1)
 #endif
+            !  bordo = bordo + &
+!                   CARTO_Dface3d(f1)*(  xnormale*xgrad + ynormale*ygrad &
+! #ifdef ELEGEO0                
+!                   + znormale*zgrad )*sur0_3d(f1)
+! #else
+!                   + znormale*zgrad )*sur_3d(f1)
+! #endif
               
 #else
            if ((cell_to_chamb_3d(c1).lt.5).and.(cell_to_chamb_3d(c2).lt.5)) then !MOD_BC ((cell_to_chamb_3d(c1).ne.9).and.(cell_to_chamb_3d(c2).ne.9)) 
@@ -1173,8 +1173,8 @@
       !      CONST32 =6.00;
       ! endif
       slowing=1.0D0
-      CONST6 = 0.3d0*(1.0+0.2d0*abs((1.0d0-CARTO_Dcell3d(i)/0.14d0)));!Elongation of APD
-      CONST7 = 0.13d0*(1.0+0.2d0*abs((1.0d0-CARTO_Dcell3d(i)/0.14d0)));
+      CONST6 = 0.3d0*(1.0+0.2d0*abs((1.0d0-CARTO_Dcell3d(i)/0.14d0))+0.2d0*abs((CARTO_Dcell3d(i)/0.14d0)));!Elongation of APD
+      CONST7 = 0.13d0*(1.0+0.2d0*abs((1.0d0-CARTO_Dcell3d(i)/0.14d0))+0.2d0*abs((CARTO_Dcell3d(i)/0.14d0)));
       CONST8 = 1.4506d0
       CONST9 = 2.7342d0;
       CONST10 = 2.0994d0;
@@ -1185,17 +1185,17 @@
       CONST14 =0.20d0;
       CONST15 =slowing*470.0d0!+100*abs((1.0d0-CARTO_Dcell3d(i)/0.14d0));
       CONST16 =0.006d0;
-      CONST17 =0.10d0*(1.0+0.2d0*abs((1.0d0-CARTO_Dcell3d(i)/0.14d0)));!*0.7D0/CARTO_Dcell3d(i);
-      CONST18 =1.56d0*(1.0-0.2d0*abs((1.0d0-CARTO_Dcell3d(i)/0.14d0)));
-      CONST19 =slowing*40.0d0*(1.0+0.2d0*abs((1.0d0-CARTO_Dcell3d(i)/0.14d0)));
-      CONST20 =slowing*1.2d0*(1.0+0.2d0*abs((1.0d0-CARTO_Dcell3d(i)/0.14d0)));
+      CONST17 =0.10d0*(1.0+0.2d0*abs((1.0d0-CARTO_Dcell3d(i)/0.14d0))+0.2d0*abs((CARTO_Dcell3d(i)/0.14d0)));!*0.7D0/CARTO_Dcell3d(i);
+      CONST18 =1.56d0!*(1.0-0.2d0*abs((1.0d0-CARTO_Dcell3d(i)/0.14d0))+0.2d0*abs((CARTO_Dcell3d(i)/0.14d0)));
+      CONST19 =slowing*40.0d0*(1.0+0.2d0*abs((1.0d0-CARTO_Dcell3d(i)/0.14d0))+0.2d0*abs((CARTO_Dcell3d(i)/0.14d0)));
+      CONST20 =slowing*1.2d0*(1.0+0.2d0*abs((1.0d0-CARTO_Dcell3d(i)/0.14d0))+0.2d0*abs((CARTO_Dcell3d(i)/0.14d0)));
       CONST21 =2.0d0;
       CONST22 =0.65d0;
       CONST23 =2.9013d0;
       CONST24 =0.0273d0;
       CONST25 =0.78d0;
-      CONST26 =40.0d0*(1.0+0.2d0*abs((1.0d0-CARTO_Dcell3d(i)/0.14d0)));
-      CONST27 =115.0d0*(1.0+0.2d0*abs((1.0d0-CARTO_Dcell3d(i)/0.14d0)));
+      CONST26 =40.0d0*(1.0+0.2d0*abs((1.0d0-CARTO_Dcell3d(i)/0.14d0))+0.2d0*abs((CARTO_Dcell3d(i)/0.14d0)));
+      CONST27 =115.0d0*(1.0+0.2d0*abs((1.0d0-CARTO_Dcell3d(i)/0.14d0))+0.2d0*abs((CARTO_Dcell3d(i)/0.14d0)));
       CONST28 =20.0d0;
       CONST29 =0.00615d0;
       CONST30 =8.0d0;
@@ -2824,8 +2824,10 @@
       do i=cstart_3d(1),cend_3d(1)
          
          chamb = cell_to_chamb_3d(i)
-         if ((chamb.eq.1).or.(chamb.eq.3)) then
          
+         if ((chamb.eq.1).or.(chamb.eq.3)) then
+
+            
             xBc = cell_bar(1,i)
             yBc = cell_bar(2,i)
             zBc = cell_bar(3,i)
@@ -3326,6 +3328,13 @@
             parco =scalaElse 
          endif
 
+#ifdef CARTO
+         parco = 1.0d0
+         sigma_f = CARTO_Dcell3d(i)
+         sigma_s = CARTO_Dcell3d(i)
+         sigma_n = 0.1D0*CARTO_Dcell3d(i)
+#endif
+         
          xfv =AmatrFibers_cell_3d(1,1,i) 
          yfv =AmatrFibers_cell_3d(2,1,i) 
          zfv =AmatrFibers_cell_3d(3,1,i) 
