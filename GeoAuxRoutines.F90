@@ -283,6 +283,12 @@ endif
       integer :: jjA,jjB,jjC,countnf,countnfSur,countCeqA,cellFacing
       integer, dimension(nctot_3d) :: contafaccecell
       integer, dimension(17) :: count_seg
+
+      real(DP)::xc1,yc1,zc1
+      real(DP)::xv1,yv1,zv1
+      real(DP)::dvvjj,num,den,projection,norm
+      real(DP)::xn,yn,zn
+      real(DP)::xf,yf,zf
 !@cuf   integer :: istat  
       !questo secondo me si puo commentare anche nel 2d
       ! do inp=1,Nparticle_3d
@@ -522,6 +528,7 @@ endif
            read(109,*) AmatrFibers_node_3d(3,3,i)
            !AmatrFibers_node_3d(3,3,i) = 1.d0
         end do
+
         read(109,*) !sheetx
         read(109,*) !sheetx
         do i=1,nvtot_3d
@@ -619,16 +626,52 @@ endif
         !Fibers cells
         !$cuf kernel do (1) 
         do i=1,nctot_3d
-           v1=vert_of_cell_3d(1,i)
-           v2=vert_of_cell_3d(2,i)
-           v3=vert_of_cell_3d(3,i)
-           v4=vert_of_cell_3d(4,i)
-
+     
+           xC1 = cell_bar(1,i)
+           yC1 = cell_bar(2,i)
+           zC1 = cell_bar(3,i)
            do j=1,3
               do k=1,3
-                 AmatrFibers_cell_3d(j,k,i)=0.25D0*(AmatrFibers_node_3d(j,k,v1)+AmatrFibers_node_3d(j,k,v2)+AmatrFibers_node_3d(j,k,v3)+AmatrFibers_node_3d(j,k,v4))        
+                 num = 0.0d0
+                 den = 0.0d0
+                 do jj=1,4
+                    v1=vert_of_cell_3d(jj,i)
+                    xV1 = xyz_3d(1,v1)
+                    yV1 = xyz_3d(2,v1)
+                    zV1 = xyz_3d(3,v1)
+                    dvvjj = sqrt( (xV1-xC1)**2+(yV1-yC1)**2+(zV1-zC1)**2)
+                    num = num + AmatrFibers_node_3d(j,k,v1)/dvvjj
+                    den = den + 1.D0/dvvjj
+                 enddo
+                 AmatrFibers_cell_3d(j,k,i)=num/den
               enddo
            enddo
+
+           norm = sqrt(AmatrFibers_cell_3d(1,3,i)**2+AmatrFibers_cell_3d(2,3,i)**2+AmatrFibers_cell_3d(3,3,i)**2)
+           !Orthonormalization
+
+           !cross
+           xn = AmatrFibers_cell_3d(1,3,i)/norm
+           yn = AmatrFibers_cell_3d(2,3,i)/norm
+           zn = AmatrFibers_cell_3d(3,3,i)/norm
+           AmatrFibers_cell_3d(1,3,i) = xn
+           AmatrFibers_cell_3d(2,3,i) = yn
+           AmatrFibers_cell_3d(3,3,i) = zn
+           
+           !fiber
+           xf = AmatrFibers_cell_3d(1,1,i)
+           yf = AmatrFibers_cell_3d(2,1,i)
+           zf = AmatrFibers_cell_3d(3,1,i)
+
+           projection=(xf*xn+yf*yn+zf*zn)/(xn*xn+yn*yn+zn*zn)
+           AmatrFibers_cell_3d(1,1,i) = xf - projection*xf
+           AmatrFibers_cell_3d(2,1,i) = yf - projection*yf
+           AmatrFibers_cell_3d(3,1,i) = zf - projection*zf
+
+           !sheet
+           AmatrFibers_cell_3d(1,2,i) = AmatrFibers_cell_3d(2,1,i)*zn-yn*AmatrFibers_cell_3d(3,1,i)
+           AmatrFibers_cell_3d(2,2,i) = AmatrFibers_cell_3d(3,1,i)*xn-zn*AmatrFibers_cell_3d(1,1,i)
+           AmatrFibers_cell_3d(3,2,i) = AmatrFibers_cell_3d(1,1,i)*yn-xn*AmatrFibers_cell_3d(2,1,i)
 
         enddo
         !@cuf istat = cudaDeviceSynchronize !JDR TMP

@@ -328,6 +328,54 @@ end do
            do i=vstart_3d(inp),vend_3d(inp)
               write(121,*) AmatrFibers_node_3d(3,1,i)
            end do
+           write(121,*)'' 
+!           write(121,*)'POINT_DATA ',nvi_3d(inp)
+           write(121,*)'Scalars sheetfiber_x FLOAT'
+           write(121,*)'LOOKUP_TABLE default'
+           do i=vstart_3d(inp),vend_3d(inp)
+              write(121,*) AmatrFibers_node_3d(1,2,i)
+           end do
+
+           write(121,*)'' 
+!           write(121,*)'POINT_DATA ',nvi_3d(inp)
+           write(121,*)'Scalars sheetfiber_y FLOAT'
+           write(121,*)'LOOKUP_TABLE default'
+           do i=vstart_3d(inp),vend_3d(inp)
+              write(121,*) AmatrFibers_node_3d(2,2,i)
+           end do
+
+           write(121,*)'' 
+!           write(121,*)'POINT_DATA ',nvi_3d(inp)
+           write(121,*)'Scalars sheetfiber_z FLOAT'
+           write(121,*)'LOOKUP_TABLE default'
+           do i=vstart_3d(inp),vend_3d(inp)
+              write(121,*) AmatrFibers_node_3d(3,2,i)
+           end do
+
+           write(121,*)'' 
+!           write(121,*)'POINT_DATA ',nvi_3d(inp)
+           write(121,*)'Scalars crossfiber_x FLOAT'
+           write(121,*)'LOOKUP_TABLE default'
+           do i=vstart_3d(inp),vend_3d(inp)
+              write(121,*) AmatrFibers_node_3d(1,3,i)
+           end do
+
+           write(121,*)'' 
+!           write(121,*)'POINT_DATA ',nvi_3d(inp)
+           write(121,*)'Scalars crossfiber_y FLOAT'
+           write(121,*)'LOOKUP_TABLE default'
+           do i=vstart_3d(inp),vend_3d(inp)
+              write(121,*) AmatrFibers_node_3d(2,3,i)
+           end do
+
+           write(121,*)'' 
+!           write(121,*)'POINT_DATA ',nvi_3d(inp)
+           write(121,*)'Scalars crossfiber_z FLOAT'
+           write(121,*)'LOOKUP_TABLE default'
+           do i=vstart_3d(inp),vend_3d(inp)
+              write(121,*) AmatrFibers_node_3d(3,3,i)
+           end do
+
 
            write(121,*)'' 
 !           write(121,*)'POINT_DATA ',nvi_3d(inp)
@@ -369,7 +417,7 @@ end do
            end do
 
            write(121,*)'' 
-!           write(121,*)'CELL_DATA ',nci_3d(inp)
+!           write(121,*)'POINT_DATA ',nvi_3d(inp)
            write(121,*)'Scalars fiber_x FLOAT'
            write(121,*)'LOOKUP_TABLE default'
            do i=cstart_3d(inp),cend_3d(inp)
@@ -377,7 +425,7 @@ end do
            end do
 
            write(121,*)'' 
-!           write(121,*)'CELL_DATA ',nci_3d(inp)
+!           write(121,*)'POINT_DATA ',nvi_3d(inp)
            write(121,*)'Scalars fiber_y FLOAT'
            write(121,*)'LOOKUP_TABLE default'
            do i=cstart_3d(inp),cend_3d(inp)
@@ -385,12 +433,60 @@ end do
            end do
 
            write(121,*)'' 
-!           write(121,*)'CELL_DATA ',nci_3d(inp)
+!           write(121,*)'POINT_DATA ',nvi_3d(inp)
            write(121,*)'Scalars fiber_z FLOAT'
            write(121,*)'LOOKUP_TABLE default'
            do i=cstart_3d(inp),cend_3d(inp)
               write(121,*) AmatrFibers_cell_3d(3,1,i)
            end do
+           write(121,*)'' 
+!           write(121,*)'POINT_DATA ',nvi_3d(inp)
+           write(121,*)'Scalars sheetfiber_x FLOAT'
+           write(121,*)'LOOKUP_TABLE default'
+           do i=cstart_3d(inp),cend_3d(inp)
+              write(121,*) AmatrFibers_cell_3d(1,2,i)
+           end do
+
+           write(121,*)'' 
+!           write(121,*)'POINT_DATA ',nvi_3d(inp)
+           write(121,*)'Scalars sheetfiber_y FLOAT'
+           write(121,*)'LOOKUP_TABLE default'
+           do i=cstart_3d(inp),cend_3d(inp)
+              write(121,*) AmatrFibers_cell_3d(2,2,i)
+           end do
+
+           write(121,*)'' 
+!           write(121,*)'POINT_DATA ',nvi_3d(inp)
+           write(121,*)'Scalars sheetfiber_z FLOAT'
+           write(121,*)'LOOKUP_TABLE default'
+           do i=cstart_3d(inp),cend_3d(inp)
+              write(121,*) AmatrFibers_cell_3d(3,2,i)
+           end do
+
+           write(121,*)'' 
+!           write(121,*)'POINT_DATA ',nvi_3d(inp)
+           write(121,*)'Scalars crossfiber_x FLOAT'
+           write(121,*)'LOOKUP_TABLE default'
+           do i=cstart_3d(inp),cend_3d(inp)
+              write(121,*) AmatrFibers_cell_3d(1,3,i)
+           end do
+
+           write(121,*)'' 
+!           write(121,*)'POINT_DATA ',nvi_3d(inp)
+           write(121,*)'Scalars crossfiber_y FLOAT'
+           write(121,*)'LOOKUP_TABLE default'
+           do i=cstart_3d(inp),cend_3d(inp)
+              write(121,*) AmatrFibers_cell_3d(2,3,i)
+           end do
+
+           write(121,*)'' 
+!           write(121,*)'POINT_DATA ',nvi_3d(inp)
+           write(121,*)'Scalars crossfiber_z FLOAT'
+           write(121,*)'LOOKUP_TABLE default'
+           do i=cstart_3d(inp),cend_3d(inp)
+              write(121,*) AmatrFibers_cell_3d(3,3,i)
+           end do
+
 
            write(121,*)'' 
 !           write(121,*)'CELL_DATA ',nci_3d(inp)

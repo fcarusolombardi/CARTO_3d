@@ -645,52 +645,33 @@
          !         write(*,*) "LS", LabelStenosi(i)
          chamb = cell_to_chamb_3d(i) !ricambiaFV
          if (LabelStenosi(i).EQ.0) then
-         !Stimulus (Bundles+Purkinje+S1S2_Stim)
-         ! if ((timeMS.GT.0).AND.(timeMS.LT.duration_signal)) then
-         !    Istim = IstimLV_3d(i)
-         ! else
-         !    Istim = 0.0D0
-         ! endif
-         !!Istim = 0.0D0 !ricambia
-         !Istim=IstimEF_3d(i)
-         if (nBeat.eq.0)then
-           !  if ((timeMS.GT.0.0D0).AND.(timeMS.LT.duration_signal_S1)) then
-         !       !Istim = IstimEF_3d(i)+IstimEF_3dS1(i)
-         !       Istim = IstimEF_3dS1(i)
-         !    ! elseif ((timeMS.GT.delayS2).AND.(timeMS.LT.delayS2+duration_signal_S2)) then
-         !    !     !Istim = IstimEF_3d(i)+IstimEF_3dS2(i)
-         !    !     !Istim = IstimEF_3dS2(i)
-         !    !    Istim = IstimEF_3dS2(i)
-         !    else
-         !       !Istim = IstimEF_3d(i)
-         !       Istim = 0.0D0
-         !    endif
-         ! elseif (nBeat.eq.1)then
-            !if ((timeMS.GT.0.0D0).AND.(timeMS.LT.0.0D0+duration_signal_S1)) then
+
+            !S1S2 CARTO
+            if (nBeat.eq.0)then
+               if ((timeMS.GT.0.0D0).AND.(timeMS.LT.duration_signal_S1)) then
+                  Istim = IstimEF_3dS1(i)
+               else
+                  Istim = 0.0D0
+               endif
+            elseif (nBeat.eq.1)then
+               !if ((timeMS.GT.0.0D0).AND.(timeMS.LT.0.0D0+duration_signal_S1)) then
                !Istim = IstimEF_3datria(i)!+IstimEF_3dS1(i)
                !Istim = IstimEF_3dS1(i)
-            if ((timeMS.GT.0.0D0).AND.(timeMS.LT.0.0D0+duration_signal_S1)) then
-               !Istim = IstimEF_3d(i)!+IstimEF_3dS1(i)
-               Istim = IstimEF_3dS1(i)
-            ! elseif ((timeMS.GT.delayS2+0.0D0).AND.(timeMS.LT.delayS2+duration_signal_S2+0.0D0)) then
-            !     !Istim = IstimEF_3d(i)+IstimEF_3dS2(i)
-            !     !Istim = IstimEF_3dS2(i)
-            !    Istim = IstimEF_3dS2(i)
-             else
-            !    !Istim = IstimEF_3d(i)
-               Istim = 0.0D0
-            endif
-         else
-            !Istim = IstimEF_3d(i)
-            !Istim = 0.0D0
-            if ((timeMS.GT.0.0D0).AND.(timeMS.LT.0.0D0+duration_signal_S1)) then
-               !Istim = IstimEF_3d(i)!+IstimEF_3dS1(i)
-               Istim = IstimEF_3dS1(i)
+               if ((timeMS.GT.0.0D0).AND.(timeMS.LT.0.0D0+duration_signal_S1)) then
+                  !Istim = IstimEF_3d(i)!+IstimEF_3dS1(i)
+                  Istim = IstimEF_3dS1(i)
+               elseif ((timeMS.GT.delayS2+0.0D0).AND.(timeMS.LT.delayS2+duration_signal_S2+0.0D0)) then
+                  Istim = IstimEF_3dS2(i)
+               else
+                  Istim = 0.0D0
+               endif
             else
-               !Istim = IstimEF_3d(i)
-               Istim = 0.0D0
+               if ((timeMS.GT.0.0D0).AND.(timeMS.LT.0.0D0+duration_signal_S1)) then
+                  Istim = IstimEF_3dS1(i)
+               else
+                  Istim = 0.0D0
+               endif
             endif
-         endif
          
 !spatial term
         bordo = 0.0D0
@@ -1173,8 +1154,8 @@
       !      CONST32 =6.00;
       ! endif
       slowing=1.0D0
-      CONST6 = 0.3d0*(1.0+0.2d0*abs((1.0d0-CARTO_Dcell3d(i)/0.14d0))+0.2d0*abs((CARTO_Dcell3d(i)/0.14d0)));!Elongation of APD
-      CONST7 = 0.13d0*(1.0+0.2d0*abs((1.0d0-CARTO_Dcell3d(i)/0.14d0))+0.2d0*abs((CARTO_Dcell3d(i)/0.14d0)));
+      CONST6 = 0.3d0*(1.0+0.1d0*abs((1.0d0-CARTO_Dcell3d(i)/cartodelta)))!+0.2d0*abs((CARTO_Dcell3d(i)/0.14d0)));!Elongation of APD
+      CONST7 = 0.13d0*(1.0+0.2d0*abs((1.0d0-CARTO_Dcell3d(i)/cartodelta)))!+0.2d0*abs((CARTO_Dcell3d(i)/0.14d0)));
       CONST8 = 1.4506d0
       CONST9 = 2.7342d0;
       CONST10 = 2.0994d0;
@@ -1185,17 +1166,17 @@
       CONST14 =0.20d0;
       CONST15 =slowing*470.0d0!+100*abs((1.0d0-CARTO_Dcell3d(i)/0.14d0));
       CONST16 =0.006d0;
-      CONST17 =0.10d0*(1.0+0.2d0*abs((1.0d0-CARTO_Dcell3d(i)/0.14d0))+0.2d0*abs((CARTO_Dcell3d(i)/0.14d0)));!*0.7D0/CARTO_Dcell3d(i);
+      CONST17 =0.10d0*(1.0+0.2d0*abs((1.0d0-CARTO_Dcell3d(i)/cartodelta)))!+0.2d0*abs((CARTO_Dcell3d(i)/0.14d0)));!*0.7D0/CARTO_Dcell3d(i);
       CONST18 =1.56d0!*(1.0-0.2d0*abs((1.0d0-CARTO_Dcell3d(i)/0.14d0))+0.2d0*abs((CARTO_Dcell3d(i)/0.14d0)));
-      CONST19 =slowing*40.0d0*(1.0+0.2d0*abs((1.0d0-CARTO_Dcell3d(i)/0.14d0))+0.2d0*abs((CARTO_Dcell3d(i)/0.14d0)));
-      CONST20 =slowing*1.2d0*(1.0+0.2d0*abs((1.0d0-CARTO_Dcell3d(i)/0.14d0))+0.2d0*abs((CARTO_Dcell3d(i)/0.14d0)));
+      CONST19 =slowing*40.0d0*(1.0+0.2d0*abs((1.0d0-CARTO_Dcell3d(i)/cartodelta)))!+0.2d0*abs((CARTO_Dcell3d(i)/0.14d0)));
+      CONST20 =slowing*1.2d0*(1.0+0.2d0*abs((1.0d0-CARTO_Dcell3d(i)/cartodelta)))!+0.2d0*abs((CARTO_Dcell3d(i)/0.14d0)));
       CONST21 =2.0d0;
       CONST22 =0.65d0;
       CONST23 =2.9013d0;
       CONST24 =0.0273d0;
       CONST25 =0.78d0;
-      CONST26 =40.0d0*(1.0+0.2d0*abs((1.0d0-CARTO_Dcell3d(i)/0.14d0))+0.2d0*abs((CARTO_Dcell3d(i)/0.14d0)));
-      CONST27 =115.0d0*(1.0+0.2d0*abs((1.0d0-CARTO_Dcell3d(i)/0.14d0))+0.2d0*abs((CARTO_Dcell3d(i)/0.14d0)));
+      CONST26 =40.0d0*(1.0+0.2d0*abs((1.0d0-CARTO_Dcell3d(i)/cartodelta)))!+0.2d0*abs((CARTO_Dcell3d(i)/0.14d0)));
+      CONST27 =115.0d0*(1.0+0.2d0*abs((1.0d0-CARTO_Dcell3d(i)/cartodelta)))!+0.2d0*abs((CARTO_Dcell3d(i)/0.14d0)));
       CONST28 =20.0d0;
       CONST29 =0.00615d0;
       CONST30 =8.0d0;
@@ -1272,7 +1253,7 @@
       CONST4 = -83;
       CONST5 = 2.7;
 
-      remod=CARTO_Dcell3d(i)/0.14D0!/0.9D0!10.0D0/1.65D0*CARTO_Dcell3d(i)
+      remod=CARTO_Dcell3d(i)/cartodelta!/0.9D0!10.0D0/1.65D0*CARTO_Dcell3d(i)
       
       XEF_3d(1,i) = STA1 + dtMS*(remod*RAT1+rhspot/(CONST5-CONST4)); 
       XEF_3d(2,i) = STA2np1
@@ -2514,7 +2495,7 @@
 
 
       return 
-      end
+    end subroutine boxEFbido
 #endif
 !===================================================
 
@@ -2551,7 +2532,7 @@
       !Label Smooth extension
       real(DP):: xC1,yC1,zC1
       real(DP):: xV1,yV1,zV1
-      integer:: step,j
+      integer:: step,j,jj
       real(DP):: num,den,dvvjj,tmp
       
       
@@ -2961,7 +2942,8 @@
       !write(*,*) "countSTE = ", countSTE, countSTElv, countVent, nctot_3d
       write(*,*) "countSTE = ", countSTE, nctot_3d, real(countSTE)/real((cend_3d(1)-cstart_3d(1)))*100.d0
 #ifdef CARTO
-      scaleD=0.15D0!0.90D0!.5D0/5.0D0
+      scaleD =0.1D0!0.90D0!.5D0/5.0D0
+      cartodelta = 0.12D0;
       open(unit=15,file='meshes/CARTO_diffusivity_3d.txt',status='old')
       do i=vstart_3d(1),vend_3d(1)
          read(15,*) tmpDcart
@@ -2973,7 +2955,7 @@
             !if (tmpDcart.lt.0.45D0) then
             !   CARTO_Dnode3d(i)=scaleD*(0.25D0+tmpDcart)
             !else
-            tmp = scaleD*(tmpDcart-1.0D0)+0.14D0
+            tmp = scaleD*(tmpDcart-1.0D0)+cartodelta
             if (tmp.lt.0.0001D0) then
                CARTO_Dnode3d(i) = tmpDcart*0.09d0
             else
@@ -2994,16 +2976,39 @@
       close(15)
       write(*,*) 'CARTO ABLATION PATH LOADED'
 
-      !$cuf kernel do (1)
-      do i=cstart_3d(1),cend_3d(1)
-         v1 = vert_of_cell_3d(1,i)
-         v2 = vert_of_cell_3d(2,i)
-         v3 = vert_of_cell_3d(3,i)
-         v4 = vert_of_cell_3d(4,i)
-         CARTO_Dcell3d(i)=0.25D0*(CARTO_Dnode3d(v1)+CARTO_Dnode3d(v2)+CARTO_Dnode3d(v3)+CARTO_Dnode3d(v4))
+      ! !$cuf kernel do (1)
+      ! do i=cstart_3d(1),cend_3d(1)
+      !    v1 = vert_of_cell_3d(1,i)
+      !    v2 = vert_of_cell_3d(2,i)
+      !    v3 = vert_of_cell_3d(3,i)
+      !    v4 = vert_of_cell_3d(4,i)
+      !    CARTO_Dcell3d(i)=0.25D0*(CARTO_Dnode3d(v1)+CARTO_Dnode3d(v2)+CARTO_Dnode3d(v3)+CARTO_Dnode3d(v4))
+      ! enddo
+      ! !@cuf istat = cudaDeviceSynchronize !JDR TMP
+
+      !$cuf kernel do (1) 
+      do i=1,nctot_3d
+
+         xC1 = cell_bar(1,i)
+         yC1 = cell_bar(2,i)
+         zC1 = cell_bar(3,i)
+
+         num = 0.0d0
+         den = 0.0d0
+         do jj=1,4
+            v1=vert_of_cell_3d(jj,i)
+            xV1 = xyz_3d(1,v1)
+            yV1 = xyz_3d(2,v1)
+            zV1 = xyz_3d(3,v1)
+            dvvjj = sqrt( (xV1-xC1)**2+(yV1-yC1)**2+(zV1-zC1)**2)
+            num = num + CARTO_Dnode3d(v1)/dvvjj
+            den = den + 1.D0/dvvjj
+         enddo
+         CARTO_Dcell3d(i)=num/den
+
       enddo
       !@cuf istat = cudaDeviceSynchronize !JDR TMP
-
+        
       !INTERPOLAZIONI VARIE TENSORE CONDUTTIVITA
 #ifdef USE_CUDA
         !$cuf kernel do (1)
@@ -3092,15 +3097,15 @@
       enddo
       !@cuf istat = cudaDeviceSynchronize !JDR TMP
 
-      !$cuf kernel do (1)
-      do i=cstart_3d(1),cend_3d(1)
-         v1 = vert_of_cell_3d(1,i)
-         v2 = vert_of_cell_3d(2,i)
-         v3 = vert_of_cell_3d(3,i)
-         v4 = vert_of_cell_3d(4,i)
-         CARTO_Dcell3d(i)=0.25D0*(CARTO_Dnode3d(v1)+CARTO_Dnode3d(v2)+CARTO_Dnode3d(v3)+CARTO_Dnode3d(v4))
-      enddo
-      !@cuf istat = cudaDeviceSynchronize !JDR TMP
+      ! !$cuf kernel do (1)
+      ! do i=cstart_3d(1),cend_3d(1)
+      !    v1 = vert_of_cell_3d(1,i)
+      !    v2 = vert_of_cell_3d(2,i)
+      !    v3 = vert_of_cell_3d(3,i)
+      !    v4 = vert_of_cell_3d(4,i)
+      !    CARTO_Dcell3d(i)=0.25D0*(CARTO_Dnode3d(v1)+CARTO_Dnode3d(v2)+CARTO_Dnode3d(v3)+CARTO_Dnode3d(v4))
+      ! enddo
+      ! !@cuf istat = cudaDeviceSynchronize !JDR TMP
 #endif
       
       !write(*,*) 'Istim calculated'
@@ -3332,7 +3337,13 @@
          parco = 1.0d0
          sigma_f = CARTO_Dcell3d(i)
          sigma_s = CARTO_Dcell3d(i)
-         sigma_n = 0.1D0*CARTO_Dcell3d(i)
+         sigma_n = CARTO_Dcell3d(i)/8.0d0
+
+         
+         parco = 1.0d0
+         sigma_if = CARTO_Dcell3d(i)
+         sigma_is = CARTO_Dcell3d(i)
+         sigma_in = CARTO_Dcell3d(i)/8.0d0
 #endif
          
          xfv =AmatrFibers_cell_3d(1,1,i) 
@@ -3413,7 +3424,12 @@
          parco = 1.0d0
          sigma_f = CARTO_Dcell3d(i)
          sigma_s = CARTO_Dcell3d(i)
-         sigma_n = 0.1D0*CARTO_Dcell3d(i)
+         sigma_n = CARTO_Dcell3d(i)/8.0d0
+
+         parco = 1.0d0
+         sigma_if = CARTO_Dcell3d(i)
+         sigma_is = CARTO_Dcell3d(i)
+         sigma_in = CARTO_Dcell3d(i)/8.0d0
 #endif
 
          if (minf.GE.1) then

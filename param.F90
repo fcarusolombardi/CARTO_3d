@@ -613,6 +613,7 @@
       ! CARTO diffusivity
       !--------------------------------------------------- 
       real(DP),dimension(:),allocatable ::CARTO_Dnode,CARTO_Dnode3d,CARTO_Dface,CARTO_Dcell3d,CARTO_Dface3d
+      real(DP)::cartodelta
       !---------------------------------------------------
       !EGM
       !---------------------------------------------------
