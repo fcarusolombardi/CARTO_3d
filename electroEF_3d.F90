@@ -3275,7 +3275,7 @@
         !------------------------------------------------
         ! Variables for infarcted zone
         character(len=4):: dummy
-        real(DP) :: dr,alpha,Px,Py,Pz,alphaDn
+        real(DP) :: dr,alpha,Px,Py,Pz,alphaDn,alphaDf
         real(DP) :: distPv1,distPv2,distPv3,distPv4
         !-----------------------------------------------
 !@cuf   integer :: istat
@@ -3292,7 +3292,7 @@
         scalaElse=0.0D0!0.00001D0!0.0D0 !non 0 altrimenti nan MESSO 0
 
         alphaDn = 1.0d0/4.0d0
-
+        alphaDf = 1.25d0
         !MONO/BIDOMAIN MODEL
         ! if (XEF_3d(22,i).eq.1.0)then
         !    Chi=140; !%mm^-1
@@ -3336,14 +3336,14 @@
 
 #ifdef CARTO
          parco = 1.0d0
-         sigma_f = CARTO_Dcell3d(i)
-         sigma_s = CARTO_Dcell3d(i)
+         sigma_f = CARTO_Dcell3d(i)*alphaDf
+         sigma_s = CARTO_Dcell3d(i)*alphaDf
          sigma_n = CARTO_Dcell3d(i)*alphaDn
 
          
          parco = 1.0d0
-         sigma_if = CARTO_Dcell3d(i)
-         sigma_is = CARTO_Dcell3d(i)
+         sigma_if = CARTO_Dcell3d(i)*alphaDf
+         sigma_is = CARTO_Dcell3d(i)*alphaDf
          sigma_in = CARTO_Dcell3d(i)*alphaDn
 #endif
          
@@ -3423,13 +3423,13 @@
             sigma_s=sigma_f/7.5779D0
 #ifdef CARTO
          parco = 1.0d0
-         sigma_f = CARTO_Dcell3d(i)
-         sigma_s = CARTO_Dcell3d(i)
+         sigma_f = CARTO_Dcell3d(i)*alphaDf
+         sigma_s = CARTO_Dcell3d(i)*alphaDf
          sigma_n = CARTO_Dcell3d(i)*alphaDn
 
          parco = 1.0d0
-         sigma_if = CARTO_Dcell3d(i)
-         sigma_is = CARTO_Dcell3d(i)
+         sigma_if = CARTO_Dcell3d(i)*alphaDf
+         sigma_is = CARTO_Dcell3d(i)*alphaDf
          sigma_in = CARTO_Dcell3d(i)*alphaDn
 #endif
 
