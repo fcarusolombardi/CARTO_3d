@@ -653,7 +653,7 @@
                else
                   Istim = 0.0D0
                endif
-            elseif (nBeat.eq.1)then
+            elseif (nBeat.eq.100)then
                !if ((timeMS.GT.0.0D0).AND.(timeMS.LT.0.0D0+duration_signal_S1)) then
                !Istim = IstimEF_3datria(i)!+IstimEF_3dS1(i)
                !Istim = IstimEF_3dS1(i)
@@ -3291,7 +3291,7 @@
 !        scalaElse=0.5D0 !non 0 altrimenti nan
         scalaElse=0.0D0!0.00001D0!0.0D0 !non 0 altrimenti nan MESSO 0
 
-        alphaDn = 1.0d0/4.0d0
+        alphaDn = 1.0d0/16.0d0
         alphaDf = 1.25d0
         !MONO/BIDOMAIN MODEL
         ! if (XEF_3d(22,i).eq.1.0)then
