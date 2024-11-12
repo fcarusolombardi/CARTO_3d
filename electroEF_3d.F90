@@ -3275,7 +3275,7 @@
         !------------------------------------------------
         ! Variables for infarcted zone
         character(len=4):: dummy
-        real(DP) :: dr,alpha,Px,Py,Pz,alphaDn,alphaDf
+        real(DP) :: dr,alpha,Px,Py,Pz,alphaDn,alphaDf,alphaDscale
         real(DP) :: distPv1,distPv2,distPv3,distPv4
         !-----------------------------------------------
 !@cuf   integer :: istat
@@ -3291,8 +3291,9 @@
 !        scalaElse=0.5D0 !non 0 altrimenti nan
         scalaElse=0.0D0!0.00001D0!0.0D0 !non 0 altrimenti nan MESSO 0
 
-        alphaDn = 1.0d0/16.0d0
-        alphaDf = 1.25d0
+        alphaDscale = 2.0d0
+        alphaDn = alphaDscale/8.0d0
+        alphaDf = alphaDscale* 1.25d0
         !MONO/BIDOMAIN MODEL
         ! if (XEF_3d(22,i).eq.1.0)then
         !    Chi=140; !%mm^-1
