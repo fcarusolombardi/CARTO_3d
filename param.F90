@@ -614,6 +614,7 @@
       !--------------------------------------------------- 
       real(DP),dimension(:),allocatable ::CARTO_Dnode,CARTO_Dnode3d,CARTO_Dface,CARTO_Dcell3d,CARTO_Dface3d
       real(DP)::cartodelta
+      real(DP),dimension(:),allocatable ::alphaDscaleV_3d,alphaDscaleC_3d
       !---------------------------------------------------
       !EGM
       !---------------------------------------------------
@@ -876,6 +877,7 @@
       !CARTO variables
       attributes(managed) :: CARTO_Dnode,CARTO_Dnode3d,CARTO_Dface,CARTO_Dcell3d,scar_tag_2d
       attributes(managed) :: CARTO_Dface3d
+      attributes(managed) :: alphaDscaleV_3d,alphaDscaleC_3d
       !EGM
 #ifdef EGM
       attributes(managed) :: EGMvec,xyz_egm

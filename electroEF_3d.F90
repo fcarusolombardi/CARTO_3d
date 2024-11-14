@@ -3276,7 +3276,12 @@
         ! Variables for infarcted zone
         character(len=4):: dummy
         real(DP) :: dr,alpha,Px,Py,Pz,alphaDn,alphaDf,alphaDscale
+        real(DP) :: alphaDnc,alphaDfc,scaleField
         real(DP) :: distPv1,distPv2,distPv3,distPv4
+
+        integer :: jj
+        real(DP) ::xc1,yc1,zc1,num,den,dvvjj
+        real(DP) ::xv1,yv1,zv1
         !-----------------------------------------------
 !@cuf   integer :: istat
 ! #ifdef USE_CUDA
@@ -3291,9 +3296,45 @@
 !        scalaElse=0.5D0 !non 0 altrimenti nan
         scalaElse=0.0D0!0.00001D0!0.0D0 !non 0 altrimenti nan MESSO 0
 
-        alphaDscale = 2.0d0
+        allocate(alphaDscaleV_3d(nvtot_3d),alphaDscaleC_3d(nctot_3d))
+        alphaDscaleV_3d(:)=0.0d0
+        alphaDscaleC_3d(:)=0.0d0
+        open(109,file='meshes/purk_field.txt')
+        do i=1,nvtot_3d
+           read(109,*) alphaDscaleV_3d(i)
+        end do
+        close (109)
+
+        !$cuf kernel do (1) 
+        do i=1,nctot_3d
+
+           xC1 = cell_bar(1,i)
+           yC1 = cell_bar(2,i)
+           zC1 = cell_bar(3,i)
+           
+           num = 0.0d0
+           den = 0.0d0
+           do jj=1,4
+              v1=vert_of_cell_3d(jj,i)
+              xV1 = xyz_3d(1,v1)
+              yV1 = xyz_3d(2,v1)
+              zV1 = xyz_3d(3,v1)
+              dvvjj = sqrt( (xV1-xC1)**2+(yV1-yC1)**2+(zV1-zC1)**2)
+              num = num + alphaDscaleV_3d(v1)/dvvjj
+              den = den + 1.D0/dvvjj
+           enddo
+           alphaDscaleC_3d(i)=num/den
+           
+        enddo
+        !@cuf istat = cudaDeviceSynchronize !JDR TMP
+
+
+        
+        alphaDscale = 1.0d0
+        scaleField = 1.50d0
         alphaDn = alphaDscale/8.0d0
-        alphaDf = alphaDscale* 1.25d0
+        alphaDf = alphaDscale* 1.5d0
+        
         !MONO/BIDOMAIN MODEL
         ! if (XEF_3d(22,i).eq.1.0)then
         !    Chi=140; !%mm^-1
@@ -3336,16 +3377,19 @@
          endif
 
 #ifdef CARTO
-         parco = 1.0d0
-         sigma_f = CARTO_Dcell3d(i)*alphaDf
-         sigma_s = CARTO_Dcell3d(i)*alphaDf
-         sigma_n = CARTO_Dcell3d(i)*alphaDn
 
+         alphaDnc = alphaDn
+         alphaDfc = alphaDf*(scaleField*alphaDscaleC_3d(i)+1.0d0)
          
          parco = 1.0d0
-         sigma_if = CARTO_Dcell3d(i)*alphaDf
-         sigma_is = CARTO_Dcell3d(i)*alphaDf
-         sigma_in = CARTO_Dcell3d(i)*alphaDn
+         sigma_f = CARTO_Dcell3d(i)*alphaDfc
+         sigma_s = CARTO_Dcell3d(i)*alphaDfc
+         sigma_n = CARTO_Dcell3d(i)*alphaDnc
+         
+         parco = 1.0d0
+         sigma_if = CARTO_Dcell3d(i)*alphaDfc
+         sigma_is = CARTO_Dcell3d(i)*alphaDfc
+         sigma_in = CARTO_Dcell3d(i)*alphaDnc
 #endif
          
          xfv =AmatrFibers_cell_3d(1,1,i) 
@@ -3420,18 +3464,22 @@
             parco =scalaElse 
             sigma_f= 1.263609/(Cm*Chi); !un valore a caso, viene molt per zero
          endif
-            sigma_n=sigma_f/7.5779D0
-            sigma_s=sigma_f/7.5779D0
+         sigma_n=sigma_f/7.5779D0
+         sigma_s=sigma_f/7.5779D0
 #ifdef CARTO
-         parco = 1.0d0
-         sigma_f = CARTO_Dcell3d(i)*alphaDf
-         sigma_s = CARTO_Dcell3d(i)*alphaDf
-         sigma_n = CARTO_Dcell3d(i)*alphaDn
 
+         alphaDnc = alphaDn
+         alphaDfc = alphaDf*(scaleField*alphaDscaleC_3d(i)+1.0d0)
+         
          parco = 1.0d0
-         sigma_if = CARTO_Dcell3d(i)*alphaDf
-         sigma_is = CARTO_Dcell3d(i)*alphaDf
-         sigma_in = CARTO_Dcell3d(i)*alphaDn
+         sigma_f = CARTO_Dcell3d(i)*alphaDfc
+         sigma_s = CARTO_Dcell3d(i)*alphaDfc
+         sigma_n = CARTO_Dcell3d(i)*alphaDnc
+         
+         parco = 1.0d0
+         sigma_if = CARTO_Dcell3d(i)*alphaDfc
+         sigma_is = CARTO_Dcell3d(i)*alphaDfc
+         sigma_in = CARTO_Dcell3d(i)*alphaDnc
 #endif
 
          if (minf.GE.1) then
