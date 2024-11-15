@@ -3331,9 +3331,9 @@
 
         
         alphaDscale = 1.0d0
-        scaleField = 1.50d0
-        alphaDn = alphaDscale/8.0d0
-        alphaDf = alphaDscale* 1.5d0
+        scaleField = 0.250d0
+        alphaDn = alphaDscale*1.50d0
+        alphaDf = alphaDscale*1.50d0
         
         !MONO/BIDOMAIN MODEL
         ! if (XEF_3d(22,i).eq.1.0)then
@@ -3379,7 +3379,7 @@
 #ifdef CARTO
 
          alphaDnc = alphaDn
-         alphaDfc = alphaDf*(scaleField*alphaDscaleC_3d(i)+1.0d0)
+         alphaDfc = scaleField*alphaDscaleC_3d(i)+alphaDf
          
          parco = 1.0d0
          sigma_f = CARTO_Dcell3d(i)*alphaDfc
@@ -3469,7 +3469,7 @@
 #ifdef CARTO
 
          alphaDnc = alphaDn
-         alphaDfc = alphaDf*(scaleField*alphaDscaleC_3d(i)+1.0d0)
+         alphaDfc = scaleField*alphaDscaleC_3d(i)+alphaDf
          
          parco = 1.0d0
          sigma_f = CARTO_Dcell3d(i)*alphaDfc
