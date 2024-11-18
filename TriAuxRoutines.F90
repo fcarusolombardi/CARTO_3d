@@ -2143,34 +2143,36 @@
         end subroutine calculate_ECG_2D
 !------------------------------------------------------
 !------------------------------------------------------
-        subroutine calculate_EGM(ECG_Pot,snc,enc,ECG_E,cell_bar,vol_3d,grad,cell_to_chamb_3d,ECG_D)
+        subroutine calculate_EGM(ECG_Pot,snc,enc,ECG_E,cell_bar,vol_3d,grad,cell_to_chamb_3d)
         use constants
-        use mls_param, only:LabelStenosi,LabelSkipConn
+        use mls_param, only:LabelStenosi,LabelSkipConn,Mintcells_3d
         use param, only:LSTAR
 !@cuf   use cudafor
 
         implicit none
         integer :: snv,env,snf,enf,v1,v2,v3,i,snc,enc
-        real(DP), dimension (snc:enc), intent(in) :: ECG_D
         real(DP), dimension (3), intent(in) :: ECG_E
         real(DP), dimension (3,snc:enc), intent(in) ::cell_bar
         real(DP), dimension (snc:enc), intent(in) ::vol_3d
         real(DP), dimension (3,snc:enc), intent(in) ::grad
         integer, dimension (snc:enc), intent(in) ::cell_to_chamb_3d
+        real(DP)::mint11,mint12,mint13
+        real(DP)::mint21,mint22,mint23
+        real(DP)::mint31,mint32,mint33 
         real(DP), intent(out) :: ECG_Pot
         real(DP) :: d12,d23,d31,sp
         real(DP) :: xEc,yEc,zEc
         real(DP) :: xBc,yBc,zBc
         real(DP) :: z1, z2, z3
-        real(DP) :: vl,Rm1,ECG_Pot_tmp
+        real(DP) :: vl,Rm1,ECG_Pot_tmp,EGMc1,EGMc2,EGMc3
         real(DP) :: ECG_gradRm1_x,ECG_gradRm1_y,ECG_gradRm1_z,chamb
 !@cuf   integer :: istat
 #ifdef USE_CUDA
-        attributes(managed) :: cell_bar,vol_3d,ECG_E,grad,cell_to_chamb_3d,ECG_D
+        attributes(managed) :: cell_bar,vol_3d,ECG_E,grad,cell_to_chamb_3d
         attributes(device) :: ECG_Pot
 #endif
 
-        ECG_Pot=0.0
+        ECG_Pot=0.0d0
 !        ECG_Pot_tmp=0.0
 
 #ifdef USE_CUDA
@@ -2181,7 +2183,7 @@
         !if ((LabelStenosi(i).EQ.0).AND.(LabelSkipConn(i).EQ.0)) then
         ! if ((LabelSkipConn(i).EQ.0)) then
            chamb=cell_to_chamb_3d(i)
-           if (chamb.LE.4) then
+           if (chamb.gt.4) cycle
            
            xEc=ECG_E(1)*1000.0D0*LSTAR
            yEc=ECG_E(2)*1000.0D0*LSTAR
@@ -2191,20 +2193,32 @@
            yBc=cell_bar(2,i)*1000.0D0*LSTAR
            zBc=cell_bar(3,i)*1000.0D0*LSTAR
 
-          vl = vol_3d(i)*(1000.0D0*LSTAR)**3
+           vl = vol_3d(i)*(1000.0D0*LSTAR)**3
+
+           mint11 = Mintcells_3d(1,1,i)
+           mint12 = Mintcells_3d(1,2,i)
+           mint13 = Mintcells_3d(1,3,i)
+           mint21 = Mintcells_3d(2,1,i)
+           mint22 = Mintcells_3d(2,2,i)
+           mint23 = Mintcells_3d(2,3,i)
+           mint31 = Mintcells_3d(3,1,i)
+           mint32 = Mintcells_3d(3,2,i)
+           mint33 = Mintcells_3d(3,3,i)
 
            Rm1=1./ ( sqrt( (xBc-xEc)**2 +(yBc-yEc)**2 +(zBc-zEc)**2  ) )
            ECG_gradRm1_x=-(xBc-xEc)*(Rm1**3);
            ECG_gradRm1_y=-(yBc-yEc)*(Rm1**3);
            ECG_gradRm1_z=-(zBc-zEc)*(Rm1**3);
 
-          ECG_Pot=ECG_Pot + (grad(1,i)*ECG_gradRm1_x + grad(2,i)*ECG_gradRm1_y + grad(3,i)*ECG_gradRm1_z)*vl*ECG_D(i)*0.25D0/(pi*0.667D0)
-          endif
+           EGMc1 = mint11*grad(1,i)+mint12*grad(2,i)+mint13*grad(3,i)
+           EGMc2 = mint21*grad(1,i)+mint22*grad(2,i)+mint23*grad(3,i)
+           EGMc3 = mint31*grad(1,i)+mint32*grad(2,i)+mint33*grad(3,i)
+           
+           ECG_Pot=ECG_Pot + (EGMc1*ECG_gradRm1_x + EGMc2*ECG_gradRm1_y + EGMc3*ECG_gradRm1_z)*vl*0.25D0/(pi*0.667D0)
 
-        !endif
         enddo
 !@cuf   istat = cudaDeviceSynchronize !JDR TMP
-
+ 
         return
         end subroutine calculate_EGM
 !------------------------------------------------------

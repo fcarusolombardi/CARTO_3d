@@ -3331,7 +3331,7 @@
 
         
         alphaDscale = 1.0d0
-        scaleField = 0.250d0
+        scaleField = 1.50d0
         alphaDn = alphaDscale*1.50d0
         alphaDf = alphaDscale*1.50d0
         
