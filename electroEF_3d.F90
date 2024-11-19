@@ -3327,13 +3327,13 @@
            
         enddo
         !@cuf istat = cudaDeviceSynchronize !JDR TMP
-
+        
 
         
         alphaDscale = 1.0d0
-        scaleField = 1.50d0
-        alphaDn = alphaDscale*1.50d0
-        alphaDf = alphaDscale*1.50d0
+        scaleField = 0.0d0
+        alphaDn = alphaDscale*0.50d0
+        alphaDf = alphaDscale*1.0d0
         
         !MONO/BIDOMAIN MODEL
         ! if (XEF_3d(22,i).eq.1.0)then
