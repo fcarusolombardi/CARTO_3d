@@ -3383,12 +3383,12 @@
          
          parco = 1.0d0
          sigma_f = CARTO_Dcell3d(i)*alphaDfc
-         sigma_s = CARTO_Dcell3d(i)*alphaDfc
+         sigma_s = CARTO_Dcell3d(i)*alphaDnc
          sigma_n = CARTO_Dcell3d(i)*alphaDnc
          
          parco = 1.0d0
          sigma_if = CARTO_Dcell3d(i)*alphaDfc
-         sigma_is = CARTO_Dcell3d(i)*alphaDfc
+         sigma_is = CARTO_Dcell3d(i)*alphaDnc
          sigma_in = CARTO_Dcell3d(i)*alphaDnc
 #endif
          
@@ -3473,12 +3473,12 @@
          
          parco = 1.0d0
          sigma_f = CARTO_Dcell3d(i)*alphaDfc
-         sigma_s = CARTO_Dcell3d(i)*alphaDfc
+         sigma_s = CARTO_Dcell3d(i)*alphaDnc
          sigma_n = CARTO_Dcell3d(i)*alphaDnc
          
          parco = 1.0d0
          sigma_if = CARTO_Dcell3d(i)*alphaDfc
-         sigma_is = CARTO_Dcell3d(i)*alphaDfc
+         sigma_is = CARTO_Dcell3d(i)*alphaDnc
          sigma_in = CARTO_Dcell3d(i)*alphaDnc
 #endif
 
