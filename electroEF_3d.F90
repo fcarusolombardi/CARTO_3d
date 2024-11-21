@@ -1153,8 +1153,6 @@
       !      CONST31 =60.00;
       !      CONST32 =6.00;
       ! endif
-        
-      !ENDO param  
       slowing=1.0D0
       CONST6 = 0.3d0*(1.0+0.1d0*abs((1.0d0-CARTO_Dcell3d(i)/cartodelta)))!+0.2d0*abs((CARTO_Dcell3d(i)/0.14d0)));!Elongation of APD
       CONST7 = 0.13d0*(1.0+0.2d0*abs((1.0d0-CARTO_Dcell3d(i)/cartodelta)))!+0.2d0*abs((CARTO_Dcell3d(i)/0.14d0)));
@@ -1183,48 +1181,12 @@
       CONST29 =0.00615d0;
       CONST30 =8.0d0;
       CONST31 =55.0d0;
-
+      
       !Added for tau_w+
       CONST32 =slowing*6.0d0;
       CONST33 =0.0005d0;
       CONST34 =175.0d0;
       CONST35 =230.0d0;
-      
-      ! ! ANNA param
-      ! slowing=1.0D0
-      ! CONST6 = 0.6d0*(1.0+0.1d0*abs((1.0d0-CARTO_Dcell3d(i)/cartodelta)))!+0.2d0*abs((CARTO_Dcell3d(i)/0.14d0)));!Elongation of APD
-      ! CONST7 = 0.13d0*(1.0+0.2d0*abs((1.0d0-CARTO_Dcell3d(i)/cartodelta)))!+0.2d0*abs((CARTO_Dcell3d(i)/0.14d0)));
-      ! CONST8 = 1.4506d0
-      ! CONST9 = 2.7342d0;
-      ! CONST10 = 2.0994d0;
-      ! CONST11 = 0.9087d0;
-      
-      ! CONST12 =25.0d0;
-      ! CONST13 =1150.0d0;
-      ! CONST14 =0.0060d0;
-      ! CONST15 =slowing*400.0d0!+100*abs((1.0d0-CARTO_Dcell3d(i)/0.14d0));
-      ! CONST16 =0.006d0;
-      ! CONST17 =0.11d0*(1.0+0.2d0*abs((1.0d0-CARTO_Dcell3d(i)/cartodelta)))!+0.2d0*abs((CARTO_Dcell3d(i)/0.14d0)));!*0.7D0/CARTO_Dcell3d(i);
-      ! CONST18 =1.56d0!*(1.0-0.2d0*abs((1.0d0-CARTO_Dcell3d(i)/0.14d0))+0.2d0*abs((CARTO_Dcell3d(i)/0.14d0)));
-      ! CONST19 =slowing*40.0d0*(1.0+0.2d0*abs((1.0d0-CARTO_Dcell3d(i)/cartodelta)))!+0.2d0*abs((CARTO_Dcell3d(i)/0.14d0)));
-      ! CONST20 =slowing*0.9957d0*(1.0+0.2d0*abs((1.0d0-CARTO_Dcell3d(i)/cartodelta)))!+0.2d0*abs((CARTO_Dcell3d(i)/0.14d0)));
-      ! CONST21 =2.0458d0;
-      ! CONST22 =0.65d0;
-      ! CONST23 =1.8975d0;
-      ! CONST24 =0.07d0;
-      ! CONST25 =0.94d0;
-      ! CONST26 =60.0d0*(1.0+0.2d0*abs((1.0d0-CARTO_Dcell3d(i)/cartodelta)))!+0.2d0*abs((CARTO_Dcell3d(i)/0.14d0)));
-      ! CONST27 =15.0d0*(1.0+0.2d0*abs((1.0d0-CARTO_Dcell3d(i)/cartodelta)))!+0.2d0*abs((CARTO_Dcell3d(i)/0.14d0)));
-      ! CONST28 =65.0d0;
-      ! CONST29 =0.03d0;
-      ! CONST30 =8.0d0;
-      ! CONST31 =60.0d0;
-      
-      ! !Added for tau_w+
-      ! CONST32 =slowing*6.0d0;
-      ! CONST33 =0.0005d0;
-      ! CONST34 =175.0d0;
-      ! CONST35 =300.0d0;
       
       STA1 = XEF_3d(1,i); !nondimensional here
       STA2 = XEF_3d(2,i);
@@ -3421,13 +3383,13 @@
          
          parco = 1.0d0
          sigma_f = CARTO_Dcell3d(i)*alphaDfc
-         sigma_s = CARTO_Dcell3d(i)*alphaDfc
-         sigma_n = CARTO_Dcell3d(i)*alphaDfc
+         sigma_s = CARTO_Dcell3d(i)*alphaDnc
+         sigma_n = CARTO_Dcell3d(i)*alphaDnc
          
          parco = 1.0d0
          sigma_if = CARTO_Dcell3d(i)*alphaDfc
-         sigma_is = CARTO_Dcell3d(i)*alphaDfc
-         sigma_in = CARTO_Dcell3d(i)*alphaDfc
+         sigma_is = CARTO_Dcell3d(i)*alphaDnc
+         sigma_in = CARTO_Dcell3d(i)*alphaDnc
 #endif
          
          xfv =AmatrFibers_cell_3d(1,1,i) 
@@ -3511,13 +3473,13 @@
          
          parco = 1.0d0
          sigma_f = CARTO_Dcell3d(i)*alphaDfc
-         sigma_s = CARTO_Dcell3d(i)*alphaDfc
-         sigma_n = CARTO_Dcell3d(i)*alphaDfc
+         sigma_s = CARTO_Dcell3d(i)*alphaDnc
+         sigma_n = CARTO_Dcell3d(i)*alphaDnc
          
          parco = 1.0d0
          sigma_if = CARTO_Dcell3d(i)*alphaDfc
-         sigma_is = CARTO_Dcell3d(i)*alphaDfc
-         sigma_in = CARTO_Dcell3d(i)*alphaDfc
+         sigma_is = CARTO_Dcell3d(i)*alphaDnc
+         sigma_in = CARTO_Dcell3d(i)*alphaDnc
 #endif
 
          if (minf.GE.1) then

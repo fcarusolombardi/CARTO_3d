@@ -2210,9 +2210,9 @@
            ECG_gradRm1_y=-(yBc-yEc)*(Rm1**3);
            ECG_gradRm1_z=-(zBc-zEc)*(Rm1**3);
 
-           EGMc1 = CARTO_Dcell3d(i)*grad(1,i)!mint11*grad(1,i)+mint12*grad(2,i)+mint13*grad(3,i)
-           EGMc2 = CARTO_Dcell3d(i)*grad(2,i)!mint21*grad(1,i)+mint22*grad(2,i)+mint23*grad(3,i)
-           EGMc3 = CARTO_Dcell3d(i)*grad(3,i)!mint31*grad(1,i)+mint32*grad(2,i)+mint33*grad(3,i)
+           EGMc1 = mint11*grad(1,i)+mint12*grad(2,i)+mint13*grad(3,i)
+           EGMc2 = mint21*grad(1,i)+mint22*grad(2,i)+mint23*grad(3,i)
+           EGMc3 = mint31*grad(1,i)+mint32*grad(2,i)+mint33*grad(3,i)
            
            ECG_Pot=ECG_Pot + (EGMc1*ECG_gradRm1_x + EGMc2*ECG_gradRm1_y + EGMc3*ECG_gradRm1_z)*vl*0.25D0/(pi*0.667D0)
 
