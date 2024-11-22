@@ -3330,7 +3330,7 @@
         
 
         
-        alphaDscale = 1.0d0
+        alphaDscale = 0.90d0
         scaleField = 0.0d0
         alphaDn = alphaDscale*0.50d0
         alphaDf = alphaDscale*1.0d0
@@ -3383,13 +3383,13 @@
          
          parco = 1.0d0
          sigma_f = CARTO_Dcell3d(i)*alphaDfc
-         sigma_s = CARTO_Dcell3d(i)*alphaDnc
-         sigma_n = CARTO_Dcell3d(i)*alphaDnc
+         sigma_s = CARTO_Dcell3d(i)*alphaDfc
+         sigma_n = CARTO_Dcell3d(i)*alphaDfc
          
          parco = 1.0d0
          sigma_if = CARTO_Dcell3d(i)*alphaDfc
-         sigma_is = CARTO_Dcell3d(i)*alphaDnc
-         sigma_in = CARTO_Dcell3d(i)*alphaDnc
+         sigma_is = CARTO_Dcell3d(i)*alphaDfc
+         sigma_in = CARTO_Dcell3d(i)*alphaDfc
 #endif
          
          xfv =AmatrFibers_cell_3d(1,1,i) 
@@ -3473,13 +3473,13 @@
          
          parco = 1.0d0
          sigma_f = CARTO_Dcell3d(i)*alphaDfc
-         sigma_s = CARTO_Dcell3d(i)*alphaDnc
-         sigma_n = CARTO_Dcell3d(i)*alphaDnc
+         sigma_s = CARTO_Dcell3d(i)*alphaDfc
+         sigma_n = CARTO_Dcell3d(i)*alphaDfc
          
          parco = 1.0d0
          sigma_if = CARTO_Dcell3d(i)*alphaDfc
-         sigma_is = CARTO_Dcell3d(i)*alphaDnc
-         sigma_in = CARTO_Dcell3d(i)*alphaDnc
+         sigma_is = CARTO_Dcell3d(i)*alphaDfc
+         sigma_in = CARTO_Dcell3d(i)*alphaDfc
 #endif
 
          if (minf.GE.1) then
