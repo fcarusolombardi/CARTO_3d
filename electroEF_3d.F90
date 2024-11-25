@@ -647,13 +647,13 @@
          if (LabelStenosi(i).EQ.0) then
 
             !S1S2 CARTO
-            if (nBeat.eq.0)then
+            if (nBeat.eq.1)then
                if ((timeMS.GT.0.0D0).AND.(timeMS.LT.duration_signal_S1)) then
                   Istim = IstimEF_3dS1(i)
                else
                   Istim = 0.0D0
                endif
-            elseif (nBeat.eq.100)then
+            elseif (nBeat.eq.0)then
                !if ((timeMS.GT.0.0D0).AND.(timeMS.LT.0.0D0+duration_signal_S1)) then
                !Istim = IstimEF_3datria(i)!+IstimEF_3dS1(i)
                !Istim = IstimEF_3dS1(i)
@@ -2942,8 +2942,8 @@
       !write(*,*) "countSTE = ", countSTE, countSTElv, countVent, nctot_3d
       write(*,*) "countSTE = ", countSTE, nctot_3d, real(countSTE)/real((cend_3d(1)-cstart_3d(1)))*100.d0
 #ifdef CARTO
-      scaleD =0.1D0!0.90D0!.5D0/5.0D0
-      cartodelta = 0.12D0;
+      scaleD =1.1D0!0.90D0!.5D0/5.0D0
+      cartodelta = 0.1D0;
       open(unit=15,file='meshes/CARTO_diffusivity_3d.txt',status='old')
       do i=vstart_3d(1),vend_3d(1)
          read(15,*) tmpDcart
@@ -2955,9 +2955,9 @@
             !if (tmpDcart.lt.0.45D0) then
             !   CARTO_Dnode3d(i)=scaleD*(0.25D0+tmpDcart)
             !else
-            tmp = scaleD*(tmpDcart-1.0D0)+cartodelta
+            tmp = (scaleD*(tmpDcart-1.0D0)+1.0d0)*cartodelta
             if (tmp.lt.0.0001D0) then
-               CARTO_Dnode3d(i) = tmpDcart*0.09d0
+               CARTO_Dnode3d(i) = tmpDcart*0.1d0
             else
                CARTO_Dnode3d(i) = tmp
             endif
@@ -3330,7 +3330,7 @@
         
 
         
-        alphaDscale = 0.90d0
+        alphaDscale = 0.70d0
         scaleField = 0.0d0
         alphaDn = alphaDscale*0.50d0
         alphaDf = alphaDscale*1.0d0
